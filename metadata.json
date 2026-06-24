@@ -1,0 +1,6 @@
+{
+  "name": "Faria Dashboard",
+  "description": "A smart, AI-driven notification and task dashboard for Faria Education Group, featuring modern glassmorphic elements and high-momentum brand tracks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

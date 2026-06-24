@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-plum: #37023c;
+  --color-darkplum: #391638;
+  --color-orange: #F78843;
+  --color-pink: #E837AC;
+  --color-yellow: #F7D35F;
+  --color-paper: #F0EBEB;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-darkplum);
+  color: #f3f4f6;
+  text-align: left;
+}
+
+/* Custom left-aligned headings */
+h1, h2, h3, h4, h5, h6, p, div, span {
+  text-align: left;
+}
