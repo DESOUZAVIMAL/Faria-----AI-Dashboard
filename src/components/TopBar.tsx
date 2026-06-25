@@ -24,17 +24,29 @@ export default function TopBar() {
         {/* Left Section: Brand Logo */}
         <Link 
           to={isAuthenticated ? "/dashboard" : "/"} 
-          className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity"
+          className="flex items-center select-none hover:opacity-90 transition-opacity"
         >
-          <div className="w-10 h-10 rounded-xl bg-[#391638] flex items-center justify-center shadow-lg shadow-black/20 border border-white/10 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-            <span className="text-2xl font-black italic select-none text-transparent bg-clip-text bg-gradient-to-tr from-[#F78843] via-[#E837AC] to-[#F7D35F] transform -translate-y-[1px] font-sans">
-              f
-            </span>
-          </div>
-          <span className="text-lg font-extrabold tracking-tight text-white font-sans">
-            Faria <span className="text-[#E837AC] font-medium">Dashboard</span>
-          </span>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#391638] flex items-center justify-center shadow-lg shadow-black/20 border border-white/10 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                <span className="text-2xl font-black italic select-none text-transparent bg-clip-text bg-gradient-to-tr from-[#F78843] via-[#E837AC] to-[#F7D35F] transform -translate-y-[1px] font-sans">
+                  f
+                </span>
+              </div>
+              <span className="text-lg font-extrabold tracking-tight text-white font-sans">
+                Faria <span className="text-[#E837AC] font-medium">Dashboard</span>
+              </span>
+            </div>
+          ) : (
+            <div className="py-2 pr-4">
+              <img 
+                src="/faria-logo.svg" 
+                alt="Faria Education Group" 
+                className="h-8 md:h-9 object-contain"
+              />
+            </div>
+          )}
         </Link>
 
         {/* Center Section: Navigation Links - Conditioned on Auth */}

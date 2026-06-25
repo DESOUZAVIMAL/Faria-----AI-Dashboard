@@ -1,45 +1,56 @@
-import React, { useRef } from "react";
-import { Link } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "motion/react";
+import BrandTracksBackground from "../components/BrandTracksBackground";
+import { useAuth } from "../lib/AuthContext";
 import { 
   Sparkles, 
   ArrowRight, 
-  Play, 
-  MessageSquare, 
-  Mail, 
-  Monitor, 
-  Clock, 
-  Compass, 
-  Layers, 
-  Cpu, 
   Zap, 
+  Clock, 
+  UserCheck, 
   ShieldCheck, 
-  Trash2, 
-  AlertTriangle,
-  ChevronRight,
-  Globe,
-  Database,
-  Terminal,
-  Activity
+  Compass, 
+  Layout, 
+  TrendingUp, 
+  BookOpen, 
+  Users, 
+  Play, 
+  ChevronRight, 
+  CheckCircle2, 
+  Info,
+  Layers,
+  Activity,
+  Globe
 } from "lucide-react";
-import { useAuth } from "../lib/AuthContext";
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuth();
-  
-  // Ref for scroll parallax effects
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"]
   });
 
-  // Transform outputs for subtle parallax elements
-  const heroBgY = useTransform(scrollYProgress, [0, 0.5], ["0%", "20%"]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+
+  // Navigation tabs for the interactive preview sandbox
+  const [activeSandboxTab, setActiveSandboxTab] = useState<"scheduling" | "matrix" | "analytics">("scheduling");
+
+  // Subtle parallax offsets
+  const heroBgY = useTransform(scrollYProgress, [0, 0.5], ["0%", "15%"]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.96]);
+
+  const handleDemoSignIn = () => {
+    login();
+    navigate("/dashboard");
+  };
 
   return (
-    <div ref={containerRef} className="relative text-white font-sans overflow-hidden bg-[#391638] selection:bg-[#E837AC]/20 selection:text-[#E837AC]">
+    <div ref={containerRef} className="relative text-white font-sans overflow-hidden bg-[#37023c] selection:bg-[#E837AC]/20 selection:text-[#E837AC]">
+      {/* Scroll-animated brand track lines background */}
+      <BrandTracksBackground />
+
       {/* Immersive high-end background gradient blurs mimicking 3D studio environments */}
       <motion.div 
         style={{ y: heroBgY, scale: heroScale }}
@@ -49,572 +60,486 @@ export default function LandingPage() {
       <div className="absolute bottom-[200px] left-10 w-[700px] h-[700px] bg-gradient-to-tr from-[#E837AC]/10 via-[#F78843]/5 to-transparent rounded-full blur-[160px] pointer-events-none z-0" />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-20 pb-32 md:pt-28 md:pb-44 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col items-center">
+      <section className="relative pt-20 pb-32 md:pt-28 md:pb-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col items-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center w-full">
           
-          {/* Hero Left: Strategic Proposition */}
-          <div className="lg:col-span-6 space-y-8 text-left">
+          {/* Hero text content */}
+          <div className="lg:col-span-7 space-y-8 text-left">
             <motion.div
               initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-black text-[#F7D35F] shadow-inner"
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-[#F7D35F]"
             >
-              <Cpu className="w-3.5 h-3.5 text-[#E837AC] animate-pulse" />
-              <span className="font-mono tracking-wider uppercase">Faria Governance Suite v2.4</span>
+              <Compass className="w-3.5 h-3.5 animate-spin-slow text-[#F7D35F]" />
+              <span>Next-Gen Academic Resource Governance</span>
             </motion.div>
 
-            <div className="space-y-4">
-              <motion.h1
-                initial={{ opacity: 0, y: 25 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
-                className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] text-white"
-              >
-                The relentless <br />
-                pursuit of <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F] filter drop-shadow-sm">
-                  better focus.
-                </span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut", delay: 0.2 }}
-                className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed font-sans font-medium"
-              >
-                Faria Dashboard pulls alerts from Slack, Zendesk, and Email, filters the noise, and maps your true priorities instantly.
-              </motion.p>
-            </div>
-
-            {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut", delay: 0.3 }}
-              className="flex flex-wrap gap-4 pt-2"
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.05]"
+            >
+              The relentless <br />
+              pursuit of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F]">better</span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg sm:text-xl text-[#F0EBEB]/90 max-w-2xl font-medium leading-relaxed"
+            >
+              We share the ambitions of schools, educators, and learners to create better collaboration, communication, and outcomes across every timezone. Map availability, track administrative compliance, and synchronize schedules seamlessly.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 pt-4"
             >
               {isAuthenticated ? (
                 <Link
                   to="/dashboard"
-                  className="inline-flex items-center gap-2.5 px-7 py-4 rounded-xl bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F] text-white font-black text-sm tracking-wide shadow-xl shadow-[#E837AC]/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                  id="hero-dashboard-btn"
+                  className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:shadow-[#E837AC]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  <span>Go to Admin Workspace</span>
-                  <ArrowRight className="w-4 h-4" />
+                  Enter Workspace
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               ) : (
                 <>
                   <Link
                     to="/login"
-                    className="inline-flex items-center gap-2.5 px-7 py-4 rounded-xl bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F] text-white font-black text-sm tracking-wide shadow-xl shadow-[#E837AC]/25 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                    id="hero-login-btn"
+                    className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:shadow-[#E837AC]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
                   >
-                    <span>Authenticate Account</span>
-                    <ArrowRight className="w-4 h-4" />
+                    Authenticate Portal
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <a
-                    href="#video-demo"
-                    className="inline-flex items-center gap-2 px-6 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm transition-all shadow-inner"
+
+                  <button
+                    onClick={handleDemoSignIn}
+                    id="hero-demo-btn"
+                    className="px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-extrabold text-sm rounded-full backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer text-center"
                   >
-                    <Play className="w-3.5 h-3.5 text-[#F7D35F] fill-[#F7D35F]" />
-                    <span>Watch Demo</span>
-                  </a>
+                    Launch Interactive Demo
+                  </button>
                 </>
               )}
             </motion.div>
 
-            {/* Micro regulatory badges */}
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              className="pt-6 border-t border-white/10 flex flex-wrap gap-6 text-white/50"
+              animate={{ opacity: 0.6 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="flex items-center gap-2 text-white/50 text-xs font-semibold pt-4"
             >
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-green-400" />
-                <span className="text-[10px] font-black uppercase tracking-wider font-mono">GDPR Compliant</span>
+              <Info className="w-4 h-4 text-[#F7D35F]" />
+              <span>Recommended: Global multi-timezone configuration for 200+ academic seats.</span>
+            </motion.div>
+          </div>
+
+          {/* Interactive 3D Perspective Floating Mockups */}
+          <div className="lg:col-span-5 relative w-full h-[450px] flex items-center justify-center">
+            
+            {/* Card 1: Main Dashboard Overview (Floating at 3D Angle) */}
+            <motion.div
+              initial={{ opacity: 0, rotateY: -15, rotateX: 10, y: 30 }}
+              animate={{ opacity: 1, rotateY: -10, rotateX: 12, y: [0, -10, 0] }}
+              transition={{
+                duration: 6,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+                opacity: { duration: 0.8 }
+              }}
+              className="absolute w-[320px] bg-[#391638]/90 border border-white/15 rounded-3xl p-5 shadow-2xl backdrop-blur-xl z-20"
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#F78843] to-[#E837AC] flex items-center justify-center font-black select-none text-xs">f</div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">Schedule Stream</span>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-[#F7D35F]" />
-                <span className="text-[10px] font-black uppercase tracking-wider font-mono">Sovereign Hosting</span>
+
+              <div className="space-y-3">
+                <div className="bg-black/25 rounded-xl p-3 border border-white/5">
+                  <div className="flex justify-between text-[10px] text-white/40 mb-1">
+                    <span>Active Overlaps</span>
+                    <span className="text-emerald-400 font-bold font-mono">92% MATCH</span>
+                  </div>
+                  <p className="text-sm font-bold text-white font-mono">14:00 - 15:30 UTC</p>
+                  <p className="text-[10px] text-white/60 mt-1">Chloe (LDN) &bull; Aarav (BOM) &bull; Kenji (TYO)</p>
+                </div>
+
+                <div className="bg-black/25 rounded-xl p-3 border border-white/5">
+                  <div className="flex justify-between text-[10px] text-white/40 mb-1">
+                    <span>Compliance Health</span>
+                    <span className="text-[#F7D35F] font-bold font-mono">GDPR PENDING</span>
+                  </div>
+                  <p className="text-sm font-bold text-white font-mono font-sans">Quadrant II Checklists</p>
+                  <p className="text-[10px] text-white/60 mt-1">3 non-essential titles auto-muted.</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 2: Companion Contact Card (Floating below) */}
+            <motion.div
+              initial={{ opacity: 0, rotateY: 15, rotateX: -5, y: 80, x: 80 }}
+              animate={{ opacity: 1, rotateY: 12, rotateX: -8, y: [80, 70, 80], x: 80 }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+                delay: 0.5,
+                opacity: { duration: 0.8 }
+              }}
+              className="absolute w-[240px] bg-gradient-to-br from-[#FAE59F] to-[#FBC5A1] rounded-2xl p-4 shadow-xl z-10 border border-white/20 text-[#37023c]"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/50">
+                  <img 
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop" 
+                    alt="Chloe" 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-xs">Chloe Vance</h4>
+                  <p className="text-[10px] opacity-75 font-semibold">Academic Lead &bull; London</p>
+                </div>
+              </div>
+              <div className="mt-3 pt-2.5 border-t border-black/10 flex justify-between items-center">
+                <span className="text-[9px] font-bold uppercase tracking-wider bg-[#37023c]/10 px-1.5 py-0.5 rounded">Active Stream</span>
+                <span className="text-[10px] font-mono font-extrabold">UTC +1</span>
+              </div>
+            </motion.div>
+
+            {/* Card 3: Compliance Circle Indicator (Floating above left) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, x: -120, y: -100 }}
+              animate={{ opacity: 1, scale: 1, x: -120, y: [-100, -110, -100] }}
+              transition={{
+                duration: 7,
+                repeat: Infinity,
+                repeatType: "reverse",
+                ease: "easeInOut",
+                delay: 1,
+                opacity: { duration: 0.8 }
+              }}
+              className="absolute bg-gradient-to-tr from-[#E837AC] to-[#F78843] rounded-2xl p-3 shadow-lg z-30 border border-white/20 text-white flex items-center gap-2"
+            >
+              <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-white animate-spin-slow" />
+              </div>
+              <div className="text-left">
+                <p className="text-[9px] font-bold text-white/80 uppercase tracking-widest leading-none">Security Rating</p>
+                <p className="text-xs font-black leading-none mt-1">A+ ISO 27001</p>
               </div>
             </motion.div>
           </div>
 
-          {/* Hero Right: Highly Styled Cluster of Floating 3D-rotated Glass Cards */}
-          <div className="lg:col-span-6 relative flex items-center justify-center min-h-[440px]">
-            {/* Visual background orbital tracks */}
-            <div className="absolute w-[450px] h-[450px] border border-white/5 rounded-full pointer-events-none flex items-center justify-center">
-              <div className="w-[300px] h-[300px] border border-white/5 rounded-full" />
-            </div>
-
-            {/* Glowing 3D Glass Cluster Panel Wrapper */}
-            <div className="relative w-full max-w-[420px] h-[380px] perspective-1000">
-              
-              {/* Card 1: Slack stream alert (Top left, tilted forward) */}
-              <motion.div
-                animate={{
-                  y: [0, -12, 0],
-                  rotateY: [15, 12, 15],
-                  rotateX: [12, 15, 12]
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                style={{ transformStyle: "preserve-3d" }}
-                className="absolute top-0 left-0 w-[240px] bg-[#37023c]/70 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-[0_20px_50px_rgba(232,55,172,0.15)] z-20 text-left cursor-default select-none"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 rounded-lg bg-[#E837AC]/20 border border-[#E837AC]/30">
-                      <MessageSquare className="w-4 h-4 text-[#E837AC]" />
-                    </div>
-                    <span className="text-[10px] font-black tracking-widest text-white/50 uppercase font-mono">Slack Channel</span>
-                  </div>
-                  <span className="w-2 h-2 rounded-full bg-[#E837AC] animate-ping" />
-                </div>
-                <h4 className="text-xs font-black text-white leading-snug">#academic-coordination</h4>
-                <p className="text-[11px] text-white/60 mt-1.5 leading-relaxed">
-                  "SSL expired on sandbox domains. Core single sign-on is offline."
-                </p>
-                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[9px] font-mono font-bold text-[#F7D35F] uppercase">URGENT</span>
-                  <span className="text-[9px] text-white/40">1m ago</span>
-                </div>
-              </motion.div>
-
-              {/* Card 2: Email stream notification (Bottom right, offset) */}
-              <motion.div
-                animate={{
-                  y: [0, 10, 0],
-                  rotateY: [-10, -8, -10],
-                  rotateX: [15, 12, 15]
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 0.5
-                }}
-                style={{ transformStyle: "preserve-3d" }}
-                className="absolute bottom-4 right-0 w-[260px] bg-[#37023c]/75 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-[0_25px_60px_rgba(247,136,67,0.15)] z-30 text-left cursor-default select-none"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1 rounded-lg bg-[#F78843]/20 border border-[#F78843]/30">
-                      <Mail className="w-4 h-4 text-[#F78843]" />
-                    </div>
-                    <span className="text-[10px] font-black tracking-widest text-white/50 uppercase font-mono">Executive Email</span>
-                  </div>
-                  <span className="text-[9px] text-white/40">5m ago</span>
-                </div>
-                <h4 className="text-xs font-black text-white leading-snug">Sarah Jenkins • Product QA</h4>
-                <p className="text-[11px] text-white/60 mt-1.5 leading-relaxed">
-                  "Please append final reviews on the Q3 academic templates prior to team synchronisation."
-                </p>
-                <div className="mt-3 pt-2 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[9px] font-mono font-bold text-[#F78843] uppercase">ACTION REQUIRED</span>
-                  <span className="text-[9px] text-white/30 font-mono">AI Ranked #2</span>
-                </div>
-              </motion.div>
-
-              {/* Card 3: Mini telemetry tracking Node (Floating background) */}
-              <motion.div
-                animate={{
-                  scale: [0.95, 1, 0.95],
-                  y: [10, -10, 10],
-                  rotate: [0, 5, 0]
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl p-3 shadow-inner z-10 text-left"
-              >
-                <div className="flex items-center gap-2 text-[#F7D35F] mb-1">
-                  <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                  <span className="text-[9px] font-black uppercase tracking-wider font-mono">Cognitive Sorter</span>
-                </div>
-                <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                  <div className="h-full w-4/5 bg-gradient-to-r from-[#F78843] to-[#E837AC]" />
-                </div>
-                <p className="text-[9px] text-white/40 font-mono mt-1">Filtering active...</p>
-              </motion.div>
-
-            </div>
-          </div>
-
         </div>
       </section>
 
-      {/* 2. THE DEMO VIDEO SHOWCASE */}
-      <section id="video-demo" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-center space-y-10"
-        >
-          <div className="space-y-4 max-w-3xl mx-auto">
-            <span className="text-xs font-black uppercase tracking-widest text-[#E837AC] font-mono">Interactive Showcase</span>
-            <h2 className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-white">
-              See the matrix in physical motion.
-            </h2>
-            <p className="text-sm sm:text-base text-white/60 max-w-2xl mx-auto leading-relaxed">
-              Ditch the static folders. Take control of your daily stream using an intelligent, single-screen administrative canvas. Watch how easily telemetry flows.
-            </p>
-          </div>
-
-          {/* Massive 16:9 3D-Shadow Video Placeholder */}
-          <div className="relative group max-w-5xl mx-auto aspect-video rounded-3xl overflow-hidden bg-[#37023c]/60 border border-white/10 shadow-[0_30px_80px_rgba(232,55,172,0.18)] transition-all duration-500 hover:border-white/20">
-            {/* Ambient glow backdrop inside */}
-            <div className="absolute inset-0 bg-radial-gradient from-transparent to-black/50 pointer-events-none" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-gradient-to-tr from-[#E837AC]/10 to-[#F78843]/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700" />
-
-            {/* Video mockup graphics: Grid elements representing active streams */}
-            <div className="absolute inset-8 border border-white/5 rounded-2xl grid grid-cols-12 gap-4 p-4 opacity-30 select-none">
-              <div className="col-span-3 rounded-xl bg-white/5 border border-white/10" />
-              <div className="col-span-6 rounded-xl bg-white/5 border border-white/10" />
-              <div className="col-span-3 rounded-xl bg-white/5 border border-white/10" />
-              <div className="col-span-4 rounded-xl bg-white/5 border border-white/10" />
-              <div className="col-span-8 rounded-xl bg-white/5 border border-white/10" />
+      {/* 2. LOGO GRID / TRUST SECTION */}
+      <section className="relative py-12 border-t border-b border-white/5 bg-black/10 z-10">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-xs uppercase tracking-widest text-[#F0EBEB]/50 font-bold mb-6">
+            Empowering governance & administration at schools worldwide
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-center opacity-65 grayscale hover:opacity-85 transition-opacity">
+            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
+              MANAGEBAC
             </div>
-
-            {/* Simulated Play button / Overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10">
-              <motion.button
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-20 h-20 rounded-full bg-gradient-to-tr from-[#F78843] via-[#E837AC] to-[#F7D35F] p-[2px] shadow-2xl cursor-pointer"
-              >
-                <div className="w-full h-full bg-[#37023c] rounded-full flex items-center justify-center">
-                  <Play className="w-7 h-7 text-[#F7D35F] fill-[#F7D35F] translate-x-0.5" />
-                </div>
-              </motion.button>
-              
-              <div className="text-center space-y-1">
-                <span className="text-xs font-black uppercase tracking-widest text-[#F7D35F] font-mono">Initialize Preview</span>
-                <p className="text-[11px] text-white/50">Run Faria Governance Simulator (Duration 1:40)</p>
-              </div>
+            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
+              OPENAPPLY
+            </div>
+            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
+              ATLAS NEXT
+            </div>
+            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
+              SCHOOLDECISIONS
+            </div>
+            <div className="hidden lg:flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
+              FARIA ONE
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* 3. FEATURE WALKTHROUGH */}
-      <section className="py-24 space-y-36 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Header of walkthrough */}
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <span className="text-xs font-black uppercase tracking-widest text-[#F78843] font-mono">Structural Breakthroughs</span>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white">Designed to protect your focus.</h2>
-          <p className="text-xs sm:text-sm text-white/60 leading-relaxed font-sans font-medium">
-            We broke down academic administrative overhead into three logical stages of clean engineering.
+      {/* 3. BENTO GRID OF CORE PLATFORM FEATURES */}
+      <section className="relative py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+        <div className="text-center space-y-4 mb-16">
+          <span className="text-xs font-mono font-bold text-[#E837AC] uppercase tracking-widest">Platform Core Architecture</span>
+          <h2 className="text-3xl md:text-5xl font-black tracking-tight">Administrative precision. Global scales.</h2>
+          <p className="text-[#F0EBEB]/70 max-w-2xl mx-auto text-sm md:text-base">
+            Engineered specifically to solve the calendar and alignment complexities inherent to global education networks.
           </p>
         </div>
 
-        {/* Feature 1: The Universal Inbox */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          {/* Text Left */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="lg:col-span-6 space-y-6 text-left"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#E837AC]/10 border border-[#E837AC]/20 flex items-center justify-center text-[#E837AC] shadow-inner">
-              <Layers className="w-6 h-6" />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">The Universal Inbox</h3>
-              <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">
-                Consolidate disconnected streams. Faria Dashboard establishes real-time synchronisation protocols with internal Slack channels, ManageBac+ alerts, and corporate Gmail domains, organizing everything into a single, cohesive feed.
-              </p>
-            </div>
-            <ul className="space-y-2.5 text-xs text-white/60 pl-1 font-sans font-medium">
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#E837AC]" />
-                <span>Zero configuration API integrations</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#E837AC]" />
-                <span>Encrypted on-site memory architecture</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#E837AC]" />
-                <span>Configurable real-time telemetry polling</span>
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* Visual Right: Isometric stack of glass panels */}
-          <motion.div
-            initial={{ opacity: 0, x: 50, rotateY: -15 }}
-            whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="lg:col-span-6 flex justify-center"
-          >
-            <div className="relative w-full max-w-[380px] h-[340px] flex items-center justify-center">
-              
-              {/* Parent Perspective box representing Solid 3D */}
-              <div className="w-full h-full transform rotate-x-[55deg] rotate-z-[-45deg] transform-style-3d scale-90">
-                {/* Panel 1: ManageBac+ (Top Layer) */}
-                <div className="absolute top-0 left-0 w-full h-[180px] bg-[#37023c]/80 border border-[#F7D35F]/40 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.5)] flex flex-col justify-between p-4 translate-z-[80px] transition-transform hover:translate-z-[100px] duration-300">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#F7D35F] font-mono">ManageBac+ Stream</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-extrabold text-white">Daily Snapshots Compiled</p>
-                    <p className="text-[10px] text-white/50">Backup storage verified</p>
-                  </div>
-                </div>
-
-                {/* Panel 2: Slack Channel (Middle Layer) */}
-                <div className="absolute top-12 left-12 w-full h-[180px] bg-[#37023c]/75 border border-[#E837AC]/40 rounded-2xl shadow-[0_15px_30px_rgba(0,0,0,0.4)] flex flex-col justify-between p-4 translate-z-[40px] transition-transform hover:translate-z-[50px] duration-300">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-[#E837AC] font-mono">Slack Feed</span>
-                    <MessageSquare className="w-3.5 h-3.5 text-[#E837AC]" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-extrabold text-white">Backlog replications</p>
-                    <p className="text-[10px] text-white/50">Capacity scaled up</p>
-                  </div>
-                </div>
-
-                {/* Panel 3: Master Sync Base (Bottom Layer) */}
-                <div className="absolute top-24 left-24 w-full h-[180px] bg-black/50 border border-white/10 rounded-2xl shadow-inner flex flex-col justify-between p-4 translate-z-0">
-                  <span className="text-[10px] font-mono font-bold text-white/30 uppercase">Master Feed Aggregator</span>
-                  <div className="flex items-center gap-1.5 text-xs text-white/40">
-                    <Cpu className="w-3.5 h-3.5 text-[#F78843] animate-spin-slow" />
-                    <span>Re-routing telemetry in real-time</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Feature 2: AI Noise Filtration */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
-          {/* Visual Left: Glowing animated funnel */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="lg:col-span-6 order-last lg:order-first flex justify-center"
-          >
-            <div className="relative w-full max-w-[360px] h-[340px] flex items-center justify-center bg-white/2 rounded-3xl border border-white/5 p-6 shadow-inner">
-              
-              {/* Funnel container */}
-              <div className="flex flex-col items-center w-full max-w-[240px] space-y-4">
-                
-                {/* Wide Top: Unsorted incoming stream */}
-                <div className="w-full h-12 rounded-xl bg-gradient-to-r from-[#F78843]/20 to-[#E837AC]/20 border border-white/10 flex items-center justify-between px-4 relative overflow-hidden">
-                  <div className="absolute inset-0 bg-white/5 animate-pulse" />
-                  <span className="text-[10px] font-mono text-white/60">Raw Alerts Input</span>
-                  <span className="text-[10px] font-bold text-white">128 items / min</span>
-                </div>
-
-                {/* Arrow down */}
-                <motion.div
-                  animate={{ y: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="h-6 w-0.5 bg-[#E837AC]"
-                />
-
-                {/* Medium Tier: Sorting matrix */}
-                <div className="w-4/5 h-12 rounded-xl bg-gradient-to-r from-[#E837AC]/20 to-[#F7D35F]/20 border border-[#E837AC]/30 flex items-center justify-center relative">
-                  <span className="text-[9px] font-mono font-black text-[#F7D35F] uppercase animate-pulse">AI Noise Filtering Engine</span>
-                </div>
-
-                {/* Arrow down */}
-                <motion.div
-                  animate={{ y: [0, 4, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                  className="h-6 w-0.5 bg-[#F7D35F]"
-                />
-
-                {/* Small Bottom: High priority compliance stream */}
-                <div className="w-1/2 h-12 rounded-xl bg-[#37023c] border border-green-500/40 shadow-[0_0_20px_rgba(74,222,128,0.15)] flex items-center justify-between px-3">
-                  <span className="text-[9px] font-mono font-bold text-green-400">Action Stream</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-ping" />
-                </div>
-
+          {/* Card 1: Multi-timezone Matrix */}
+          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#E837AC]/30 transition-colors">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#E837AC]/10 border border-[#E837AC]/20 flex items-center justify-center text-[#E837AC]">
+                <Globe className="w-6 h-6 text-[#E837AC]" />
               </div>
-
-            </div>
-          </motion.div>
-
-          {/* Text Right */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="lg:col-span-6 space-y-6 text-left"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#F78843]/10 border border-[#F78843]/20 flex items-center justify-center text-[#F78843] shadow-inner">
-              <Sparkles className="w-6 h-6 animate-pulse" />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">AI Noise Filtration</h3>
-              <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">
-                Not all alerts are created equal. Faria's cognitive sorting engine processes incoming alerts, filters out automated snapshots or non-critical birthday updates, and highlights only high-impact actions. Useless notifications are automatically routed to the eliminate archive.
+              <h3 className="text-xl font-bold tracking-tight text-white">Multi-Timezone Sweep Matrix</h3>
+              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
+                Automatically maps local calendars to real UTC overlaps. Instantly discover exact hour segments where teammates across three continents share synchronized free blocks.
               </p>
             </div>
-            <ul className="space-y-2.5 text-xs text-white/60 pl-1 font-sans font-medium">
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F78843]" />
-                <span>Advanced priority classification</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F78843]" />
-                <span>Automatic background archiving</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F78843]" />
-                <span>Manual threshold controls</span>
-              </li>
-            </ul>
-          </motion.div>
-        </div>
-
-        {/* Feature 3: The Eisenhower Matrix */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          {/* Text Left */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="lg:col-span-6 space-y-6 text-left"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#F7D35F]/10 border border-[#F7D35F]/20 flex items-center justify-center text-[#F7D35F] shadow-inner">
-              <Compass className="w-6 h-6" />
+            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#E837AC] gap-1 group-hover:gap-2 transition-all">
+              <span>Explore Overlap Tracker</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </div>
-            <div className="space-y-3">
-              <h3 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Interactive Governance Matrix</h3>
-              <p className="text-sm text-white/70 leading-relaxed font-sans font-medium">
-                Prioritise with fluid drag-and-drop. Our interactive, full-screen compliance matrix segments outstanding notifications and active tasks into four discrete quadrants of urgency and importance.
+          </div>
+
+          {/* Card 2: GDPR & Privacy Compliance */}
+          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#F78843]/30 transition-colors">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#F78843]/10 border border-[#F78843]/20 flex items-center justify-center text-[#F78843]">
+                <ShieldCheck className="w-6 h-6 text-[#F78843]" />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight text-white">GDPR & Academic Governance</h3>
+              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
+                Filter private events, mute confidential keywords, and configure secure working-hour fences. Rest assured that sensitive school records and private calendar items remain fully localized.
               </p>
             </div>
-            <ul className="space-y-2.5 text-xs text-white/60 pl-1 font-sans font-medium">
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F7D35F]" />
-                <span>Real-time quadrant load capacity monitoring</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F7D35F]" />
-                <span>Automated system warnings for overload limits</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <ChevronRight className="w-4 h-4 text-[#F7D35F]" />
-                <span>Smooth transitions with fluid Framer Motion feedback</span>
-              </li>
-            </ul>
-          </motion.div>
-
-          {/* Visual Right: Stylized, elevated 2x2 grid */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="lg:col-span-6 flex justify-center"
-          >
-            <div className="relative w-full max-w-[380px] h-[340px] flex items-center justify-center">
-              
-              {/* Matrix mock layout */}
-              <div className="grid grid-cols-2 gap-3 w-full max-w-[340px] p-4 bg-white/2 border border-white/5 rounded-2xl relative shadow-inner">
-                {/* Q1 DO */}
-                <div className="h-[120px] rounded-xl bg-[#37023c]/80 border border-[#E837AC]/30 p-3.5 flex flex-col justify-between text-left shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-mono font-black text-[#E837AC] uppercase tracking-widest">Q1 DO</span>
-                    <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-[#E837AC]/10 text-[#E837AC] font-bold">2 Items</span>
-                  </div>
-                  <div className="h-1 w-full bg-[#E837AC] rounded-full" />
-                </div>
-
-                {/* Q2 PLAN */}
-                <div className="h-[120px] rounded-xl bg-[#37023c]/80 border border-[#F78843]/30 p-3.5 flex flex-col justify-between text-left shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-mono font-black text-[#F78843] uppercase tracking-widest">Q2 PLAN</span>
-                    <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-[#F78843]/10 text-[#F78843] font-bold">4 Items</span>
-                  </div>
-                  <div className="h-1 w-full bg-[#F78843] rounded-full" />
-                </div>
-
-                {/* Q3 DELEGATE */}
-                <div className="h-[120px] rounded-xl bg-[#37023c]/80 border border-[#F7D35F]/30 p-3.5 flex flex-col justify-between text-left shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-mono font-black text-[#F7D35F] uppercase tracking-widest">Q3 DELEGATE</span>
-                    <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-[#F7D35F]/10 text-[#F7D35F] font-bold">1 Item</span>
-                  </div>
-                  <div className="h-1 w-full bg-[#F7D35F] rounded-full" />
-                </div>
-
-                {/* Q4 ELIMINATE */}
-                <div className="h-[120px] rounded-xl bg-[#37023c]/80 border border-[#552859]/30 p-3.5 flex flex-col justify-between text-left shadow-lg opacity-40">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-mono font-black text-white/50 uppercase tracking-widest">Q4 ELIMINATE</span>
-                    <span className="text-[8px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-white/50 font-bold">0 Items</span>
-                  </div>
-                  <div className="h-1 w-full bg-white/10 rounded-full" />
-                </div>
-              </div>
-
+            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#F78843] gap-1 group-hover:gap-2 transition-all">
+              <span>Inspect Security Mandates</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </div>
-          </motion.div>
-        </div>
+          </div>
 
+          {/* Card 3: Intelligent AI Copilot */}
+          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#F7D35F]/30 transition-colors">
+            <div className="space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#F7D35F]/10 border border-[#F7D35F]/20 flex items-center justify-center text-[#F7D35F]">
+                <Sparkles className="w-6 h-6 text-[#F7D35F] animate-pulse" />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight text-white">Gemini Governance Copilot</h3>
+              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
+                Talk to your schedule in natural human language. Let our integrated AI analyze meeting rosters, evaluate school-day streaks, and auto-recommend optimal workspace agendas instantly.
+              </p>
+            </div>
+            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#F7D35F] gap-1 group-hover:gap-2 transition-all">
+              <span>Launch AI Sandbox</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+
+        </div>
       </section>
 
-      {/* 4. BOTTOM CALL TO ACTION */}
+      {/* 4. INTERACTIVE SANDBOX DEMO SECTION */}
+      <section className="relative py-20 bg-black/15 z-10 border-t border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+            
+            {/* Left side: descriptions of sandbox */}
+            <div className="lg:col-span-5 space-y-6 text-left">
+              <span className="text-xs font-mono font-bold text-[#F7D35F] uppercase tracking-widest">Interactive Experience</span>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Experience Faria Operations in real-time</h2>
+              <p className="text-sm text-[#F0EBEB]/70 leading-relaxed">
+                Click through the preview tabs to visualize the high-momentum tracking streams we use to map global academic rosters.
+              </p>
+
+              {/* Tabs list */}
+              <div className="space-y-2 pt-4">
+                {[
+                  { id: "scheduling", title: "Overlap Schedulers", desc: "Discover consensus-free times." },
+                  { id: "matrix", title: "Compliance Checklists", desc: "Mute keywords & protect GDPR data." },
+                  { id: "analytics", title: "Global Roster Analytics", desc: "Evaluate team distribution across regions." }
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveSandboxTab(tab.id as any)}
+                    className={`w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer ${
+                      activeSandboxTab === tab.id
+                        ? "bg-white/5 border-[#E837AC] text-white shadow-lg"
+                        : "bg-transparent border-transparent text-white/50 hover:text-white"
+                    }`}
+                  >
+                    <h4 className="text-sm font-bold">{tab.title}</h4>
+                    <p className="text-xs opacity-80 mt-0.5">{tab.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Right side: Mockup terminal container */}
+            <div className="lg:col-span-7">
+              <div className="bg-[#391638] border border-white/10 rounded-3xl shadow-2xl overflow-hidden relative">
+                
+                {/* Header terminal controls */}
+                <div className="h-12 bg-black/20 flex items-center justify-between px-5 border-b border-white/5">
+                  <div className="flex gap-1.5">
+                    <span className="w-3 h-3 rounded-full bg-rose-400/80" />
+                    <span className="w-3 h-3 rounded-full bg-[#F7D35F]/80" />
+                    <span className="w-3 h-3 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <span className="text-[10px] text-white/40 font-mono font-bold uppercase tracking-wider">
+                    governance-matrix-v1.4.1.sys
+                  </span>
+                  <span className="w-4 h-4 rounded bg-white/5 flex items-center justify-center text-[10px] font-mono text-white/30">
+                    &bull;
+                  </span>
+                </div>
+
+                {/* Sandbox viewports based on tab */}
+                <div className="p-8 min-h-[300px] flex flex-col justify-center">
+                  {activeSandboxTab === "scheduling" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4 text-left"
+                    >
+                      <div className="flex items-center justify-between bg-black/30 border border-white/5 rounded-xl p-4">
+                        <div>
+                          <p className="text-xs font-bold text-[#E837AC]">Academic Alignment Consensus</p>
+                          <p className="text-[10px] text-white/40">London, Mumbai, and Tokyo streams verified</p>
+                        </div>
+                        <span className="text-[11px] font-bold text-[#F7D35F] bg-[#F7D35F]/10 px-2.5 py-1 rounded">Optimal Run</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-white/5 p-3 rounded-xl text-center">
+                          <p className="text-[10px] text-white/40">Consensus Free-Block</p>
+                          <p className="text-sm font-bold mt-1">11:30 - 13:00</p>
+                          <span className="text-[9px] text-[#E837AC] font-mono">UTC TIMEZONE</span>
+                        </div>
+                        <div className="bg-white/5 p-3 rounded-xl text-center">
+                          <p className="text-[10px] text-white/40">Average Availability</p>
+                          <p className="text-sm font-bold mt-1">4.5 Hrs / Day</p>
+                          <span className="text-[9px] text-[#F78843] font-mono">HIGH-MOMENTUM</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {activeSandboxTab === "matrix" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4 text-left"
+                    >
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                        <p className="text-xs font-bold text-[#F78843] mb-2 flex items-center gap-1.5">
+                          <ShieldCheck className="w-4 h-4 text-[#F78843]" />
+                          GDPR Privacy Filter
+                        </p>
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] text-white/60">
+                            <span>Muted Keyword: "Staff Evaluation"</span>
+                            <span className="text-emerald-400 font-bold">MUTED</span>
+                          </div>
+                          <div className="flex justify-between text-[11px] text-white/60">
+                            <span>Muted Keyword: "Board Meeting"</span>
+                            <span className="text-emerald-400 font-bold">MUTED</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-white/40 italic">
+                        * All non-compliant text strings are client-side filtered prior to calendar render cycles.
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {activeSandboxTab === "analytics" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-4 text-left"
+                    >
+                      <div className="flex justify-between items-center bg-black/20 p-4 rounded-xl">
+                        <div>
+                          <p className="text-xs font-bold">Roster Coverage Distribution</p>
+                          <p className="text-[10px] text-white/40">Academic staff across global operations</p>
+                        </div>
+                        <span className="text-xs font-bold text-[#F7D35F]">99.8% SYNC</span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-[#E837AC] to-[#F78843] w-4/5" />
+                        </div>
+                        <div className="flex justify-between text-[9px] text-white/50">
+                          <span>EMEA (80%)</span>
+                          <span>APAC (65%)</span>
+                          <span>Americas (40%)</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Bottom console output strip */}
+                <div className="h-10 bg-black/40 flex items-center px-5 border-t border-white/5 text-[9px] font-mono text-[#F7D35F]">
+                  <span className="animate-pulse mr-2">&gt;_</span> Sync sequence successfully initialized. Overlap data ready.
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 5. BOTTOM CALL TO ACTION */}
       <section className="py-28 relative z-10 overflow-hidden">
         {/* Dynamic backdrop accent */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-[#E837AC]/15 via-[#F78843]/10 to-transparent rounded-full blur-[110px] pointer-events-none" />
 
         <div className="max-w-4xl mx-auto px-4 text-center space-y-10 relative z-10">
           <div className="space-y-5">
-            <span className="text-xs font-black uppercase tracking-widest text-[#F7D35F] font-mono">Administrative Sovereignty</span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-none text-white">
-              Ready to claim your administrative workspace?
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
+              Ready to streamline your <br />
+              educational operations?
             </h2>
-            <p className="text-sm sm:text-base text-white/75 max-w-2xl mx-auto leading-relaxed">
-              Consolidate outstanding admissions streams, protect critical sandbox SSO integrations, and balance administrative workloads with precision.
+            <p className="text-base md:text-lg text-[#F0EBEB]/70 max-w-2xl mx-auto leading-relaxed">
+              Join thousands of academic administrators and curriculum leads worldwide who trust Faria to power their timezone alignments and compliance workflows.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-xl bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F] text-white font-black text-sm tracking-wide shadow-2xl shadow-[#E837AC]/30 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-            >
-              <span>Sign In to Workspace</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-sm transition-all"
-            >
-              <span>Activate Demo Access</span>
-            </Link>
-          </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                id="cta-dashboard-btn"
+                className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              >
+                Enter Faria Workspace
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  id="cta-login-btn"
+                  className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  Authenticate Portal
+                </Link>
 
-          <p className="text-[10px] text-white/40 uppercase font-mono tracking-widest font-bold">
-            No long-term setup required. Secure SSO sandbox enabled by default.
-          </p>
+                <button
+                  onClick={handleDemoSignIn}
+                  id="cta-demo-btn"
+                  className="px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-extrabold text-sm rounded-full backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  Explore Interactive Demo
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </section>
 
