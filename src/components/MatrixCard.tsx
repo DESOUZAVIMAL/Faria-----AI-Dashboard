@@ -32,11 +32,11 @@ export default function MatrixCard({ item, onDragStart }: MatrixCardProps) {
       case "managebac+":
         return <Monitor className="w-4 h-4 text-[#F7D35F]" />;
       case "email":
-        return <Mail className="w-4 h-4 text-[#F78843]" />;
+        return <Mail className="w-4 h-4 text-[#F78B43]" />;
       case "calendar":
         return <CalendarIcon className="w-4 h-4 text-[#F7D35F]" />;
       default:
-        return <ListTodo className="w-4 h-4 text-[#F78843]" />;
+        return <ListTodo className="w-4 h-4 text-[#F78B43]" />;
     }
   };
 
@@ -54,7 +54,7 @@ export default function MatrixCard({ item, onDragStart }: MatrixCardProps) {
       }`}
     >
       {/* Visual top border indicator matching type */}
-      <div className={`h-[3px] w-full ${isNotif ? "bg-gradient-to-r from-[#E837AC] to-[#F78843]" : "bg-gradient-to-r from-[#F78843] to-[#F7D35F]"}`} />
+      <div className={`h-[3px] w-full ${isNotif ? "bg-gradient-to-r from-[#E837AC] to-[#F78B43]" : "bg-gradient-to-r from-[#F78B43] to-[#F7D35F]"}`} />
       
       {/* Card Content body */}
       <div className="p-4 flex flex-col gap-3 min-w-0">
@@ -62,7 +62,7 @@ export default function MatrixCard({ item, onDragStart }: MatrixCardProps) {
           <div className="flex items-center gap-2.5 min-w-0">
             {/* Round Glass icon wrap */}
             <div className="p-1.5 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center flex-shrink-0 shadow-inner">
-              {isNotif ? getSourceIcon(source) : <ListTodo className="w-4 h-4 text-[#F78843]" />}
+              {isNotif ? getSourceIcon(source) : <ListTodo className="w-4 h-4 text-[#F78B43]" />}
             </div>
             
             <div className="min-w-0">
@@ -76,7 +76,7 @@ export default function MatrixCard({ item, onDragStart }: MatrixCardProps) {
           <span className={`text-[9px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md font-mono ${
             isNotif 
               ? "bg-[#E837AC]/15 text-[#E837AC] border border-[#E837AC]/20" 
-              : "bg-[#F78843]/15 text-[#F78843] border border-[#F78843]/20"
+              : "bg-[#F78B43]/15 text-[#F78B43] border border-[#F78B43]/20"
           }`}>
             {isNotif ? "Inbox" : "Task"}
           </span>

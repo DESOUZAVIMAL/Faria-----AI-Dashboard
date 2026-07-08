@@ -52,12 +52,12 @@ export default function MatrixPage() {
       subtitle: "Important, Not Urgent (Build Momentum)",
       isUrgent: false,
       isImportant: true,
-      borderColor: "border-[#F78843]/30 focus-within:border-[#F78843] hover:border-[#F78843]/50",
-      accentBg: "bg-[#F78843]/10",
+      borderColor: "border-[#F78B43]/30 focus-within:border-[#F78B43] hover:border-[#F78B43]/50",
+      accentBg: "bg-[#F78B43]/10",
       glowClass: "shadow-[inset_0_0_24px_rgba(247,136,67,0.15)]",
-      themeColor: "#F78843",
-      gradientFrom: "from-[#F78843]",
-      icon: <Clock className="w-5 h-5 text-[#F78843]" />
+      themeColor: "#F78B43",
+      gradientFrom: "from-[#F78B43]",
+      icon: <Clock className="w-5 h-5 text-[#F78B43]" />
     },
     {
       id: "q3",

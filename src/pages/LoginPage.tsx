@@ -28,7 +28,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-160px)] flex items-center justify-center px-4 relative">
       {/* Dynamic 3D ambient lights */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#E837AC]/20 via-[#F78843]/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-tr from-[#E837AC]/20 via-[#F78B43]/10 to-transparent rounded-full blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -49,7 +49,7 @@ export default function LoginPage() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="w-full h-full rounded-full bg-gradient-to-tr from-[#F78843] via-[#E837AC] to-[#F7D35F] opacity-50 blur-sm"
+            className="w-full h-full rounded-full bg-gradient-to-tr from-[#F78B43] via-[#E837AC] to-[#F7D35F] opacity-50 blur-sm"
           />
         </div>
 
@@ -61,9 +61,9 @@ export default function LoginPage() {
           </div>
 
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#391638] flex items-center justify-center shadow-2xl border border-white/10 relative overflow-hidden group">
+            <div className="w-16 h-16 rounded-2xl bg-[#391e38] flex items-center justify-center shadow-2xl border border-white/10 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent pointer-events-none" />
-              <span className="text-4xl font-black italic select-none text-transparent bg-clip-text bg-gradient-to-tr from-[#F78843] via-[#E837AC] to-[#F7D35F] transform -translate-y-[2px]">
+              <span className="text-4xl font-black italic select-none text-transparent bg-clip-text bg-gradient-to-tr from-[#F78B43] via-[#E837AC] to-[#F7D35F] transform -translate-y-[2px]">
                 f
               </span>
             </div>
@@ -93,7 +93,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@fariaedu.com"
-                className="w-full bg-[#391638]/40 border border-white/10 focus:border-[#E837AC] focus:ring-2 focus:ring-[#E837AC]/20 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-white/30 focus:outline-none transition-all font-sans text-left"
+                className="w-full bg-[#391e38]/40 border border-white/10 focus:border-[#E837AC] focus:ring-2 focus:ring-[#E837AC]/20 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-white/30 focus:outline-none transition-all font-sans text-left"
               />
             </div>
           </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
               <label className="text-[11px] font-extrabold uppercase tracking-widest text-white/60 block font-mono">
                 Password
               </label>
-              <span className="text-[10px] text-[#F78843] hover:underline cursor-pointer font-bold font-sans">
+              <span className="text-[10px] text-[#F78B43] hover:underline cursor-pointer font-bold font-sans">
                 Forgot Credentials?
               </span>
             </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full bg-[#391638]/40 border border-white/10 focus:border-[#E837AC] focus:ring-2 focus:ring-[#E837AC]/20 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-white/30 focus:outline-none transition-all font-sans text-left"
+                className="w-full bg-[#391e38]/40 border border-white/10 focus:border-[#E837AC] focus:ring-2 focus:ring-[#E837AC]/20 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder-white/30 focus:outline-none transition-all font-sans text-left"
               />
             </div>
           </div>
@@ -134,7 +134,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full relative flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-extrabold text-sm tracking-wide transition-all shadow-lg shadow-black/20 cursor-pointer hover:scale-[1.01] active:scale-[0.99] disabled:opacity-80 bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F]"
+            className="w-full relative flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-white font-extrabold text-sm tracking-wide transition-all shadow-lg shadow-black/20 cursor-pointer hover:scale-[1.01] active:scale-[0.99] disabled:opacity-80 bg-gradient-to-r from-[#F78B43] via-[#E837AC] to-[#F7D35F]"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">

@@ -17,7 +17,9 @@ import {
   Layers,
   Loader2,
   LayoutGrid,
-  List
+  List,
+  ExternalLink,
+  LogIn
 } from "lucide-react";
 import { useDashboard, AICategory } from "../lib/DashboardContext";
 import MatrixView from "./MatrixView";
@@ -31,6 +33,12 @@ export default function Inbox() {
     archiveNotification,
     autoSortInbox,
     resetStream,
+    dataSource,
+    isLoading,
+    refresh,
+    sheetConfigured,
+    isConnected,
+    connect,
   } = useDashboard();
 
   const [activeFilter, setActiveFilter] = useState<"All" | "Urgent" | "Action" | "FYI">("All");
@@ -134,6 +142,46 @@ export default function Inbox() {
 
         {/* Global Toolbar Actions */}
         <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+          {/* Live / Demo data-source badge */}
+          <span
+            title={
+              dataSource === "live"
+                ? "Connected to your Google Sheet (Workspace Studio)"
+                : "Showing demo data — connect your Google Sheet to go live"
+            }
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${
+              dataSource === "live"
+                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                : "bg-white/5 text-white/50 border-white/10"
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${dataSource === "live" ? "bg-emerald-400 animate-pulse" : "bg-white/40"}`} />
+            {dataSource === "live" ? "Live" : "Demo"}
+          </span>
+
+          {sheetConfigured && !isConnected ? (
+            <button
+              onClick={connect}
+              title="Sign in with your Faria Google account to load your sheet"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[#37023c] text-xs font-extrabold transition-all cursor-pointer border border-white/10 hover:bg-white/90 shadow-sm"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Connect Google Sheet</span>
+            </button>
+          ) : (
+            sheetConfigured && (
+              <button
+                onClick={refresh}
+                disabled={isLoading}
+                title="Pull latest triaged items from the Google Sheet"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white transition-all cursor-pointer border border-white/10 disabled:opacity-60"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#E837AC] ${isLoading ? "animate-spin" : ""}`} />
+                <span>Sync</span>
+              </button>
+            )
+          )}
+
           {/* High Polish View Mode Toggle */}
           <div className="inline-flex rounded-xl p-1 bg-black/20 border border-white/10 mr-1 shadow-inner">
             <button
@@ -398,6 +446,18 @@ export default function Inbox() {
                             Workflow Actions
                           </div>
                           <div className="flex items-center gap-1.5">
+                            {notif.link && (
+                              <a
+                                href={notif.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Open the original message to reply"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white/70 hover:text-white hover:bg-white/10 transition-all cursor-pointer border border-white/10"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5 text-[#F7D35F]" />
+                                <span>Open</span>
+                              </a>
+                            )}
                             <button
                               onClick={() => archiveNotification(notif.id)}
                               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white/60 hover:text-[#E837AC] hover:bg-white/5 transition-all cursor-pointer border border-transparent hover:border-white/10"

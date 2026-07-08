@@ -1,0 +1,8 @@
+_calendar
+.pnpm-store
+.tmp
+.codeinsight
+.claude
+db.json
+node_modules
+dist

@@ -2,6 +2,7 @@ import React from "react";
 import Brief from "../components/Brief";
 import Tasks from "../components/Tasks";
 import Inbox from "../components/Inbox";
+import KeyDates from "../components/KeyDates";
 
 export default function TodayPage() {
   return (
@@ -13,9 +14,10 @@ export default function TodayPage() {
 
       {/* Main Content Area: Two-Column Bento Grid */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Smaller, holds Tasks (4 cols) */}
-        <div className="lg:col-span-4 xl:col-span-4 h-full">
+        {/* Left Column: Smaller, holds Tasks + Key Dates (4 cols) */}
+        <div className="lg:col-span-4 xl:col-span-4 flex flex-col gap-8">
           <Tasks />
+          <KeyDates />
         </div>
 
         {/* Right Column: Larger, holds Inbox (8 cols) */}
