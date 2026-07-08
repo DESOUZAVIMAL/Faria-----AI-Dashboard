@@ -50,7 +50,7 @@ export default function MatrixView() {
       case "managebac+":
         return <Monitor className="w-3.5 h-3.5 text-[#37023c]" />;
       case "email":
-        return <Mail className="w-3.5 h-3.5 text-[#F78843]" />;
+        return <Mail className="w-3.5 h-3.5 text-[#F78B43]" />;
       case "calendar":
         return <CalendarIcon className="w-3.5 h-3.5 text-[#F7D35F]" />;
       default:
@@ -78,12 +78,12 @@ export default function MatrixView() {
       subtitle: "Important, Not Urgent",
       isUrgent: false,
       isImportant: true,
-      borderColor: "border-[#F78843]/40 hover:border-[#F78843]/70",
-      accentBg: "bg-[#F78843]/5",
-      textColor: "text-[#F78843]",
-      pillColor: "bg-[#F78843] text-white",
+      borderColor: "border-[#F78B43]/40 hover:border-[#F78B43]/70",
+      accentBg: "bg-[#F78B43]/5",
+      textColor: "text-[#F78B43]",
+      pillColor: "bg-[#F78B43] text-white",
       glowColor: "shadow-[0_4px_20px_-4px_rgba(247,136,67,0.15)]",
-      icon: <Clock className="w-4 h-4 text-[#F78843]" />
+      icon: <Clock className="w-4 h-4 text-[#F78B43]" />
     },
     {
       id: "q3",
@@ -93,7 +93,7 @@ export default function MatrixView() {
       isImportant: false,
       borderColor: "border-[#F7D35F]/50 hover:border-[#F7D35F]/80",
       accentBg: "bg-[#F7D35F]/5",
-      textColor: "text-[#F7D35F] dark:text-[#F78843]",
+      textColor: "text-[#F7D35F] dark:text-[#F78B43]",
       pillColor: "bg-[#F7D35F] text-[#37023c]",
       glowColor: "shadow-[0_4px_20px_-4px_rgba(247,211,95,0.15)]",
       icon: <UserCheck className="w-4 h-4 text-[#F7D35F]" />
@@ -245,7 +245,7 @@ export default function MatrixView() {
                         >
                           {/* Momentum accent border */}
                           <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${
-                            isNotif ? "bg-[#E837AC]" : "bg-[#F78843]"
+                            isNotif ? "bg-[#E837AC]" : "bg-[#F78B43]"
                           }`} />
 
                           {/* Left Column: Icon + Text */}
@@ -254,7 +254,7 @@ export default function MatrixView() {
                               {isNotif ? (
                                 getSourceIcon(item.data.source)
                               ) : (
-                                <ListTodo className="w-3.5 h-3.5 text-[#F78843]" />
+                                <ListTodo className="w-3.5 h-3.5 text-[#F78B43]" />
                               )}
                             </div>
                             <div className="text-left min-w-0">

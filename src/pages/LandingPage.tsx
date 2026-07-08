@@ -1,548 +1,705 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "motion/react";
-import BrandTracksBackground from "../components/BrandTracksBackground";
+import {
+  motion, useScroll, useTransform, useInView, AnimatePresence, animate, MotionValue,
+} from "motion/react";
 import { useAuth } from "../lib/AuthContext";
-import { 
-  Sparkles, 
-  ArrowRight, 
-  Zap, 
-  Clock, 
-  UserCheck, 
-  ShieldCheck, 
-  Compass, 
-  Layout, 
-  TrendingUp, 
-  BookOpen, 
-  Users, 
-  Play, 
-  ChevronRight, 
-  CheckCircle2, 
-  Info,
-  Layers,
-  Activity,
-  Globe
+import InteractiveGradient from "../components/InteractiveGradient";
+import {
+  ArrowRight, Sparkles, CheckCircle2, Lock, ChevronDown, AlertTriangle,
+  ListTodo, MessageSquare, Mail, Monitor, Zap, Clock, UserCheck, Trash2,
+  Inbox, Filter, BarChart3, LayoutDashboard, Headphones, CheckSquare,
+  GraduationCap, Layers, Brain,
 } from "lucide-react";
 
-export default function LandingPage() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
-  });
+/* ══════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════ */
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  useEffect(() => {
+    if (!inView || !ref.current) return;
+    const ctrl = animate(0, to, {
+      duration: 2, ease: "easeOut",
+      onUpdate: (v) => { if (ref.current) ref.current.textContent = Math.round(v).toLocaleString() + suffix; },
+    });
+    return () => ctrl.stop();
+  }, [inView, to, suffix]);
+  return <span ref={ref}>0{suffix}</span>;
+}
 
-  const { isAuthenticated, login } = useAuth();
-  const navigate = useNavigate();
+function Reveal({ children, delay = 0, y = 28, className = "" }: {
+  children: React.ReactNode; delay?: number; y?: number; className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  return (
+    <motion.div ref={ref} initial={{ opacity: 0, y }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={className}>
+      {children}
+    </motion.div>
+  );
+}
 
-  // Navigation tabs for the interactive preview sandbox
-  const [activeSandboxTab, setActiveSandboxTab] = useState<"scheduling" | "matrix" | "analytics">("scheduling");
+/* ══════════════════════════════════════════════════
+   FEATURE DEMOS (solid dark cards — shown inside the tornado)
+══════════════════════════════════════════════════ */
+const NOTIFICATIONS = [
+  { id: 1, title: "Database latency exceeded during peak Europe sync", source: "ManageBac+", time: "12m", cat: "Urgent", catColor: "#E837AC" },
+  { id: 2, title: "SSL certificate renewals failing for partner portals", source: "Email", time: "45m", cat: "Urgent", catColor: "#E837AC" },
+  { id: 3, title: "Feedback requested on international curriculum plan", source: "Slack", time: "32m", cat: "Action", catColor: "#F78B43" },
+  { id: 4, title: "Critical SSO outage on production sandbox", source: "Zendesk", time: "50m", cat: "Urgent", catColor: "#E837AC" },
+  { id: 5, title: "Global standards webinar rescheduled to 2:30 PM", source: "Email", time: "2h", cat: "Action", catColor: "#F78B43" },
+  { id: 6, title: "Weekly school system backup verified successfully", source: "ManageBac+", time: "5h", cat: "FYI", catColor: "#F7D35F" },
+];
 
-  // Subtle parallax offsets
-  const heroBgY = useTransform(scrollYProgress, [0, 0.5], ["0%", "15%"]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.96]);
+function SourceIcon({ src }: { src: string }) {
+  if (src === "Slack")      return <MessageSquare className="w-3.5 h-3.5 text-[#E837AC]" />;
+  if (src === "ManageBac+") return <Monitor className="w-3.5 h-3.5 text-[#F7D35F]" />;
+  if (src === "Email")      return <Mail className="w-3.5 h-3.5 text-[#F78B43]" />;
+  return <Monitor className="w-3.5 h-3.5 text-white/40" />;
+}
 
-  const handleDemoSignIn = () => {
-    login();
-    navigate("/dashboard");
-  };
+function InboxDemo({ progress }: { progress: MotionValue<number> }) {
+  const [shown, setShown] = useState(2);
+  const [filter, setFilter] = useState<"All" | "Urgent" | "Action" | "FYI">("All");
+  useEffect(() => progress.on("change", v => setShown(Math.min(NOTIFICATIONS.length, Math.floor(v * NOTIFICATIONS.length * 1.6) + 2))), [progress]);
+  const filtered = filter === "All" ? NOTIFICATIONS : NOTIFICATIONS.filter(n => n.cat === filter);
 
   return (
-    <div ref={containerRef} className="relative text-white font-sans overflow-hidden bg-[#37023c] selection:bg-[#E837AC]/20 selection:text-[#E837AC]">
-      {/* Scroll-animated brand track lines background */}
-      <BrandTracksBackground />
+    <div className="w-full">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "#1e0926", border: "1px solid rgba(232,55,172,0.25)" }}>
+        <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between" style={{ background: "#250b2e" }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#E837AC] to-[#F78B43] flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white">AI Smart Inbox</p>
+              <p className="text-[9px] text-white/45">Auto-sorted by urgency</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#E837AC] animate-pulse" />
+            <span className="text-[9px] text-[#E837AC] font-black">3 URGENT</span>
+          </div>
+        </div>
+        <div className="flex px-5 pt-3 gap-1.5">
+          {(["All", "Urgent", "Action", "FYI"] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              className="text-[9px] font-bold px-3 py-1 rounded-full transition-all"
+              style={filter === f
+                ? { background: f === "Urgent" ? "#E837AC" : f === "Action" ? "#F78B43" : f === "FYI" ? "rgba(247,211,95,0.25)" : "rgba(255,255,255,0.18)", color: f === "FYI" ? "#F7D35F" : "#fff" }
+                : { background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.45)" }}>
+              {f}
+            </button>
+          ))}
+        </div>
+        <div className="p-4 space-y-2 min-h-[230px]">
+          <AnimatePresence>
+            {filtered.slice(0, Math.max(2, shown)).map((n, i) => (
+              <motion.div key={n.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25, delay: i * 0.04 }}
+                className="flex items-start gap-3 p-3 rounded-xl"
+                style={{ background: "#2d1038", borderLeft: `3px solid ${n.catColor}` }}>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: `${n.catColor}18` }}>
+                  <SourceIcon src={n.source} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded" style={{ background: `${n.catColor}28`, color: n.catColor }}>{n.cat}</span>
+                    <span className="text-[8px] text-white/40">{n.source}</span>
+                    <span className="text-[8px] text-white/30 ml-auto">{n.time} ago</span>
+                  </div>
+                  <p className="text-[10px] text-white/85 leading-snug">{n.title}</p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+        <div className="px-5 py-3 border-t border-white/8 flex items-center justify-between" style={{ background: "#250b2e" }}>
+          <p className="text-[9px] text-white/35">{NOTIFICATIONS.length} total notifications</p>
+          <div className="flex items-center gap-1.5 text-[9px] text-[#F7D35F] font-black"><Sparkles className="w-3 h-3" /> AI Sort Active</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      {/* Immersive high-end background gradient blurs mimicking 3D studio environments */}
-      <motion.div 
-        style={{ y: heroBgY, scale: heroScale }}
-        className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#E837AC]/15 via-[#F78843]/5 to-transparent rounded-full blur-[140px] pointer-events-none z-0" 
-      />
-      <div className="absolute top-[800px] right-1/4 w-[500px] h-[500px] bg-gradient-to-bl from-[#F7D35F]/10 via-[#37023c]/20 to-transparent rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[200px] left-10 w-[700px] h-[700px] bg-gradient-to-tr from-[#E837AC]/10 via-[#F78843]/5 to-transparent rounded-full blur-[160px] pointer-events-none z-0" />
+const TASKS_DATA = [
+  { title: "Review categorised admissions stream", priority: "High", color: "#E837AC", done: false },
+  { title: "Respond to critical platform migration ticket", priority: "High", color: "#E837AC", done: false },
+  { title: "Prepare agenda for global curriculum sync", priority: "Medium", color: "#F78B43", done: true },
+  { title: "Proofread academic brochure drafts", priority: "Low", color: "#F7D35F", done: false },
+];
 
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-20 pb-32 md:pt-28 md:pb-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 flex flex-col items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center w-full">
-          
-          {/* Hero text content */}
-          <div className="lg:col-span-7 space-y-8 text-left">
-            <motion.div
-              initial={{ opacity: 0, y: -15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-bold text-[#F7D35F]"
-            >
-              <Compass className="w-3.5 h-3.5 animate-spin-slow text-[#F7D35F]" />
-              <span>Next-Gen Academic Resource Governance</span>
-            </motion.div>
+function TaskDemo({ progress }: { progress: MotionValue<number> }) {
+  const barW = useTransform(progress, [0.05, 0.55], [0, 1]);
+  const barWStr = useTransform(barW, v => `${Math.round(v * 25)}%`);
+  const [shown, setShown] = useState(1);
+  useEffect(() => progress.on("change", v => setShown(Math.floor(v * TASKS_DATA.length * 1.8) + 1)), [progress]);
 
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white leading-[1.05]"
-            >
-              The relentless <br />
-              pursuit of <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F78843] via-[#E837AC] to-[#F7D35F]">better</span>
-            </motion.h1>
+  return (
+    <div className="w-full">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "#1e0926", border: "1px solid rgba(247,139,67,0.25)" }}>
+        <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between" style={{ background: "#250b2e" }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(247,139,67,0.18)", border: "1px solid rgba(247,139,67,0.35)" }}>
+              <ListTodo className="w-4 h-4 text-[#F78B43]" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-white">Smart Tasks</p>
+              <p className="text-[9px] text-white/45">Manage your active focus stack</p>
+            </div>
+          </div>
+          <span className="text-sm font-black text-[#E837AC]">1/4</span>
+        </div>
+        <div className="px-5 py-4 border-b border-white/8" style={{ background: "#220a2a" }}>
+          <div className="flex justify-between text-[10px] mb-2">
+            <span className="text-white/65 font-semibold">Today's Progress</span>
+            <span className="text-[#E837AC] font-black">25%</span>
+          </div>
+          <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+            <motion.div className="h-full rounded-full" style={{ width: barWStr, background: "linear-gradient(90deg, #F78B43, #E837AC, #F7D35F)" }} />
+          </div>
+        </div>
+        <div className="p-4 space-y-2">
+          <AnimatePresence>
+            {TASKS_DATA.slice(0, Math.min(TASKS_DATA.length, Math.max(1, shown))).map((task, i) => (
+              <motion.div key={task.title} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.22, delay: i * 0.05 }}
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{ background: "#2d1038", borderLeft: `3px solid ${task.color}` }}>
+                <div className="w-4 h-4 rounded-full border flex items-center justify-center flex-shrink-0"
+                  style={{ borderColor: task.done ? task.color : "rgba(255,255,255,0.22)", background: task.done ? task.color : "transparent" }}>
+                  {task.done && <CheckCircle2 className="w-3 h-3 text-white" />}
+                </div>
+                <span className={`text-xs flex-1 ${task.done ? "line-through text-white/35" : "text-white/88 font-medium"}`}>{task.title}</span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded" style={{ background: `${task.color}22`, color: task.color }}>{task.priority}</span>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg sm:text-xl text-[#F0EBEB]/90 max-w-2xl font-medium leading-relaxed"
-            >
-              We share the ambitions of schools, educators, and learners to create better collaboration, communication, and outcomes across every timezone. Map availability, track administrative compliance, and synchronize schedules seamlessly.
-            </motion.p>
+const QUADRANTS = [
+  { id: "q1", title: "DO FIRST", sub: "Urgent & Important", color: "#E837AC", icon: Zap, items: ["SSL cert failure", "SSO sandbox outage", "DB latency spike"] },
+  { id: "q2", title: "PLAN", sub: "Important, Not Urgent", color: "#F78B43", icon: Clock, items: ["Curriculum framework", "Audit trail review"] },
+  { id: "q3", title: "DELEGATE", sub: "Urgent, Not Important", color: "#F7D35F", icon: UserCheck, items: ["Webinar rescheduled"] },
+  { id: "q4", title: "ARCHIVE", sub: "Neither urgent nor important", color: "#6b3878", icon: Trash2, items: ["Birthday reminder"] },
+];
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 pt-4"
-            >
+function MatrixDemo({ progress }: { progress: MotionValue<number> }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => progress.on("change", v => setShown(Math.floor(v * 14))), [progress]);
+
+  return (
+    <div className="w-full">
+      <div className="rounded-2xl overflow-hidden" style={{ background: "#1e0926", border: "1px solid rgba(247,211,95,0.25)" }}>
+        <div className="px-5 py-4 border-b border-white/8 flex items-center justify-between" style={{ background: "#250b2e" }}>
+          <div>
+            <p className="text-xs font-bold text-white">Faria Priority Matrix</p>
+            <p className="text-[9px] text-white/45">Eisenhower 4-quadrant · Drag to reprioritise</p>
+          </div>
+          <span className="text-[9px] font-black px-2.5 py-1 rounded-full" style={{ background: "rgba(247,211,95,0.12)", border: "1px solid rgba(247,211,95,0.25)", color: "#F7D35F" }}>8 items</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3 p-4">
+          {QUADRANTS.map((q, qi) => {
+            const Icon = q.icon;
+            const visibleItems = q.items.slice(0, Math.max(0, shown - qi * 2));
+            return (
+              <motion.div key={q.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: qi * 0.08 }}
+                className="rounded-xl p-3 min-h-[110px]" style={{ background: `${q.color}10`, border: `1px solid ${q.color}28` }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: q.color }} />
+                  <div>
+                    <p className="text-[8px] font-black uppercase tracking-wider" style={{ color: q.color }}>{q.title}</p>
+                    <p className="text-[7px] text-white/35">{q.sub}</p>
+                  </div>
+                </div>
+                <div className="w-full h-0.5 rounded-full mb-1.5" style={{ background: "rgba(255,255,255,0.06)" }}>
+                  <div className="h-full rounded-full" style={{ width: `${(q.items.length / 5) * 100}%`, background: q.color }} />
+                </div>
+                <div className="space-y-1">
+                  <AnimatePresence>
+                    {visibleItems.map((item) => (
+                      <motion.div key={item} initial={{ opacity: 0, x: 5 }} animate={{ opacity: 1, x: 0 }}
+                        className="text-[8px] text-white/70 px-2 py-1 rounded-md" style={{ background: `${q.color}12` }}>
+                        {item}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   HERO LOGO — upright gradient "f", IN FRONT, on a light tile
+══════════════════════════════════════════════════ */
+function HeroLogo() {
+  return (
+    <div className="relative h-[460px] lg:h-[560px] flex items-center justify-center" style={{ perspective: 1200 }}>
+      {/* glow halo behind the tile */}
+      <div className="absolute rounded-full blur-[80px] opacity-60"
+        style={{ width: 360, height: 360, background: "radial-gradient(circle, rgba(255,255,255,0.7), rgba(247,211,95,0.4) 45%, rgba(232,55,172,0) 70%)" }} />
+
+      {/* LOGO TILE — front element. Entrance (opacity/scale) on outer motion.div,
+          continuous float (transform) on a separate inner .float-soft element. */}
+      <motion.div className="relative" style={{ zIndex: 6 }}
+        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}>
+        <div className="float-soft grid place-items-center"
+          style={{
+            width: "clamp(240px, 30vw, 340px)", aspectRatio: "1",
+            borderRadius: "2.4rem",
+            background: "linear-gradient(150deg, #ffffff 0%, #fff3f9 55%, #ffe9f4 100%)",
+            border: "1px solid rgba(255,255,255,0.9)",
+            boxShadow: "0 40px 90px -22px rgba(183,30,138,0.55), 0 10px 30px rgba(74,4,40,0.18), inset 0 2px 0 rgba(255,255,255,0.9)",
+          }}>
+          <span className="font-black select-none"
+            style={{
+              fontFamily: "'Nunito Sans', sans-serif",
+              fontStyle: "normal",
+              fontSize: "clamp(150px, 19vw, 230px)",
+              lineHeight: 1, paddingBottom: "0.08em",
+              background: "linear-gradient(150deg, #F78B43 0%, #E837AC 55%, #C71E8A 100%)",
+              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+              filter: "drop-shadow(0 4px 10px rgba(200,30,120,0.25))",
+            }}>
+            f
+          </span>
+        </div>
+      </motion.div>
+
+      {/* Floating app-preview cards — entrance on outer, float on inner */}
+      <motion.div className="absolute" style={{ top: "-2%", right: "-2%", zIndex: 8 }}
+        initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.7 }}>
+        <div className="float-soft w-[244px] rounded-2xl p-4 shadow-2xl"
+          style={{ background: "rgba(20,4,22,0.94)", border: "1px solid rgba(255,255,255,0.14)" }}>
+          <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-2.5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center font-black text-[10px] text-white" style={{ background: "linear-gradient(135deg, #F78B43, #E837AC)" }}>f</div>
+              <span className="text-[9px] font-black uppercase tracking-wider text-white/55">Daily Brief</span>
+            </div>
+            <span className="text-[9px] text-[#E837AC] font-black">3 URGENT</span>
+          </div>
+          <p className="text-[11px] font-bold text-white/90 mb-2.5 leading-snug">Good morning, Vimal. 3 urgent items across 6 platforms.</p>
+          <div className="rounded-lg p-2 flex items-center justify-between" style={{ background: "#2d1038" }}>
+            <span className="text-[9px] text-white/50">Noise filtered today</span>
+            <span className="text-[10px] font-black text-[#F7D35F]">92%</span>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div className="absolute" style={{ bottom: "16%", left: "-4%", zIndex: 9 }}
+        initial={{ opacity: 0, x: -18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.9 }}>
+        <div className="float-soft rounded-2xl p-3 shadow-xl flex items-center gap-2.5"
+          style={{ background: "linear-gradient(135deg, #E837AC, #F78B43)", border: "1px solid rgba(255,255,255,0.25)" }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,0.25)" }}>
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-[8px] font-black text-white/80 uppercase tracking-widest">AI Sorted</p>
+            <p className="text-xs font-black text-white">48 → 6 urgent</p>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div className="absolute" style={{ bottom: "-1%", right: "4%", zIndex: 8 }}
+        initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 1.05 }}>
+        <div className="float-soft rounded-2xl p-3.5 shadow-xl"
+          style={{ background: "linear-gradient(135deg, #FFFFFF, #FFE9F3)", color: "#37023c", minWidth: "176px", border: "1px solid rgba(255,255,255,0.9)" }}>
+          <p className="font-extrabold text-[11px] mb-2">Priority Matrix</p>
+          <div className="grid grid-cols-2 gap-1">
+            {[{ l: "DO FIRST", v: 4 }, { l: "PLAN", v: 2 }, { l: "DELEGATE", v: 1 }, { l: "ARCHIVE", v: 1 }].map(q => (
+              <div key={q.l} className="rounded-lg px-2 py-1" style={{ background: "rgba(183,30,138,0.08)" }}>
+                <p className="text-[7px] font-black opacity-60">{q.l}</p>
+                <p className="text-sm font-black">{q.v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   HERO (warm brand-graphic background)
+══════════════════════════════════════════════════ */
+function HeroSection({ isAuthenticated, onDemo }: { isAuthenticated: boolean; onDemo: () => void }) {
+  return (
+    <section className="relative min-h-screen flex items-center overflow-hidden">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* LEFT — dark plum text on warm */}
+          <div className="space-y-7">
+            <div className="hero-in inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black"
+              style={{ background: "rgba(55,2,60,0.14)", border: "1px solid rgba(55,2,60,0.2)", color: "#37023c", animationDelay: "0.1s" }}>
+              <Lock className="w-3 h-3" /> Internal tool · Faria Education Group
+            </div>
+
+            <h1 className="hero-in text-5xl sm:text-6xl xl:text-[74px] font-black leading-[1.02]"
+              style={{ color: "#2a0421", animationDelay: "0.22s", letterSpacing: "-0.02em" }}>
+              One inbox for<br />everything your<br />
+              <span style={{ color: "#B81E83" }}>ops team</span> juggles.
+            </h1>
+
+            <p className="hero-in text-lg max-w-lg leading-relaxed font-medium" style={{ color: "rgba(42,4,33,0.72)", animationDelay: "0.36s" }}>
+              Faria pulls every notification from Gmail, Slack, Zendesk, ClickUp and more into
+              <span className="font-bold" style={{ color: "#2a0421" }}> one place</span> — then the AI filters, sorts and prioritises it for you.
+            </p>
+
+            <div className="hero-in flex flex-col sm:flex-row gap-4 pt-2" style={{ animationDelay: "0.5s" }}>
               {isAuthenticated ? (
-                <Link
-                  to="/dashboard"
-                  id="hero-dashboard-btn"
-                  className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:shadow-[#E837AC]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
-                >
-                  Enter Workspace
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <Link to="/dashboard" className="group px-8 py-4 text-white font-bold text-sm rounded-full hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                  style={{ background: "#2a0421", boxShadow: "0 10px 30px rgba(42,4,33,0.3)" }}>
+                  Open Dashboard <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               ) : (
                 <>
-                  <Link
-                    to="/login"
-                    id="hero-login-btn"
-                    className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:shadow-[#E837AC]/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 flex items-center justify-center gap-2 group cursor-pointer"
-                  >
-                    Authenticate Portal
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-
-                  <button
-                    onClick={handleDemoSignIn}
-                    id="hero-demo-btn"
-                    className="px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-extrabold text-sm rounded-full backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer text-center"
-                  >
-                    Launch Interactive Demo
+                  <button onClick={onDemo} className="group px-8 py-4 text-white font-bold text-sm rounded-full hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                    style={{ background: "#2a0421", boxShadow: "0 10px 30px rgba(42,4,33,0.3)" }}>
+                    Try the Demo <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
+                  <Link to="/login" className="px-8 py-4 font-bold text-sm rounded-full hover:scale-[1.03] active:scale-[0.98] transition-all text-center"
+                    style={{ background: "rgba(255,255,255,0.65)", border: "1px solid rgba(255,255,255,0.9)", color: "#2a0421" }}>
+                    Log In
+                  </Link>
                 </>
               )}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex items-center gap-2 text-white/50 text-xs font-semibold pt-4"
-            >
-              <Info className="w-4 h-4 text-[#F7D35F]" />
-              <span>Recommended: Global multi-timezone configuration for 200+ academic seats.</span>
-            </motion.div>
+            </div>
           </div>
 
-          {/* Interactive 3D Perspective Floating Mockups */}
-          <div className="lg:col-span-5 relative w-full h-[450px] flex items-center justify-center">
-            
-            {/* Card 1: Main Dashboard Overview (Floating at 3D Angle) */}
-            <motion.div
-              initial={{ opacity: 0, rotateY: -15, rotateX: 10, y: 30 }}
-              animate={{ opacity: 1, rotateY: -10, rotateX: 12, y: [0, -10, 0] }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-                opacity: { duration: 0.8 }
-              }}
-              className="absolute w-[320px] bg-[#391638]/90 border border-white/15 rounded-3xl p-5 shadow-2xl backdrop-blur-xl z-20"
-              style={{ transformStyle: "preserve-3d" }}
-            >
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#F78843] to-[#E837AC] flex items-center justify-center font-black select-none text-xs">f</div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-white/60">Schedule Stream</span>
-                </div>
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-
-              <div className="space-y-3">
-                <div className="bg-black/25 rounded-xl p-3 border border-white/5">
-                  <div className="flex justify-between text-[10px] text-white/40 mb-1">
-                    <span>Active Overlaps</span>
-                    <span className="text-emerald-400 font-bold font-mono">92% MATCH</span>
-                  </div>
-                  <p className="text-sm font-bold text-white font-mono">14:00 - 15:30 UTC</p>
-                  <p className="text-[10px] text-white/60 mt-1">Chloe (LDN) &bull; Aarav (BOM) &bull; Kenji (TYO)</p>
-                </div>
-
-                <div className="bg-black/25 rounded-xl p-3 border border-white/5">
-                  <div className="flex justify-between text-[10px] text-white/40 mb-1">
-                    <span>Compliance Health</span>
-                    <span className="text-[#F7D35F] font-bold font-mono">GDPR PENDING</span>
-                  </div>
-                  <p className="text-sm font-bold text-white font-mono font-sans">Quadrant II Checklists</p>
-                  <p className="text-[10px] text-white/60 mt-1">3 non-essential titles auto-muted.</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Card 2: Companion Contact Card (Floating below) */}
-            <motion.div
-              initial={{ opacity: 0, rotateY: 15, rotateX: -5, y: 80, x: 80 }}
-              animate={{ opacity: 1, rotateY: 12, rotateX: -8, y: [80, 70, 80], x: 80 }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-                delay: 0.5,
-                opacity: { duration: 0.8 }
-              }}
-              className="absolute w-[240px] bg-gradient-to-br from-[#FAE59F] to-[#FBC5A1] rounded-2xl p-4 shadow-xl z-10 border border-white/20 text-[#37023c]"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/50">
-                  <img 
-                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop" 
-                    alt="Chloe" 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-xs">Chloe Vance</h4>
-                  <p className="text-[10px] opacity-75 font-semibold">Academic Lead &bull; London</p>
-                </div>
-              </div>
-              <div className="mt-3 pt-2.5 border-t border-black/10 flex justify-between items-center">
-                <span className="text-[9px] font-bold uppercase tracking-wider bg-[#37023c]/10 px-1.5 py-0.5 rounded">Active Stream</span>
-                <span className="text-[10px] font-mono font-extrabold">UTC +1</span>
-              </div>
-            </motion.div>
-
-            {/* Card 3: Compliance Circle Indicator (Floating above left) */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, x: -120, y: -100 }}
-              animate={{ opacity: 1, scale: 1, x: -120, y: [-100, -110, -100] }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-                delay: 1,
-                opacity: { duration: 0.8 }
-              }}
-              className="absolute bg-gradient-to-tr from-[#E837AC] to-[#F78843] rounded-2xl p-3 shadow-lg z-30 border border-white/20 text-white flex items-center gap-2"
-            >
-              <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-white animate-spin-slow" />
-              </div>
-              <div className="text-left">
-                <p className="text-[9px] font-bold text-white/80 uppercase tracking-widest leading-none">Security Rating</p>
-                <p className="text-xs font-black leading-none mt-1">A+ ISO 27001</p>
-              </div>
-            </motion.div>
-          </div>
-
+          {/* RIGHT — logo in front */}
+          <HeroLogo />
         </div>
-      </section>
+      </div>
 
-      {/* 2. LOGO GRID / TRUST SECTION */}
-      <section className="relative py-12 border-t border-b border-white/5 bg-black/10 z-10">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs uppercase tracking-widest text-[#F0EBEB]/50 font-bold mb-6">
-            Empowering governance & administration at schools worldwide
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, y: [0, 8, 0] }}
+        transition={{ opacity: { delay: 1.6 }, y: { repeat: Infinity, duration: 1.8, ease: "easeInOut" } }}
+        className="absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
+        style={{ zIndex: 20, color: "rgba(42,4,33,0.5)" }}>
+        <ChevronDown className="w-4 h-4" />
+        <span className="text-[9px] tracking-[0.18em] uppercase font-bold">see how it works</span>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   INTEGRATIONS — sources signalling into the F hub
+══════════════════════════════════════════════════ */
+const SOURCES = [
+  { name: "Gmail",     icon: Mail,          color: "#EA4335", angle: -90 },
+  { name: "Slack",     icon: MessageSquare, color: "#611f69", angle: -30 },
+  { name: "Zendesk",   icon: Headphones,    color: "#03363D", angle: 30 },
+  { name: "ClickUp",   icon: CheckSquare,   color: "#7B68EE", angle: 90 },
+  { name: "ManageBac", icon: GraduationCap, color: "#0a7", angle: 150 },
+  { name: "Jira",      icon: Layers,        color: "#2684FF", angle: 210 },
+];
+
+function IntegrationsSection() {
+  const R = 250, CX = 380, CY = 300;
+  const pts = SOURCES.map((s) => {
+    const rad = (s.angle * Math.PI) / 180;
+    return { ...s, x: CX + R * Math.cos(rad), y: CY + R * Math.sin(rad) };
+  });
+  return (
+    <section className="relative py-20 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4">
+        <Reveal className="text-center mb-2">
+          <span className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: "#7a0f5e" }}>Connected to everything</span>
+          <h2 className="text-3xl md:text-5xl font-black mt-3" style={{ color: "#2a0421", letterSpacing: "-0.02em" }}>
+            Every tool your team uses,<br />wired into one dashboard.
+          </h2>
+          <p className="max-w-xl mx-auto mt-4 text-base font-medium" style={{ color: "rgba(42,4,33,0.7)" }}>
+            Faria listens to all of them at once and routes every signal into a single live feed.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 items-center opacity-65 grayscale hover:opacity-85 transition-opacity">
-            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
-              MANAGEBAC
-            </div>
-            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
-              OPENAPPLY
-            </div>
-            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
-              ATLAS NEXT
-            </div>
-            <div className="flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
-              SCHOOLDECISIONS
-            </div>
-            <div className="hidden lg:flex justify-center text-sm font-extrabold tracking-tight text-white select-none">
-              FARIA ONE
-            </div>
-          </div>
-        </div>
-      </section>
+        </Reveal>
 
-      {/* 3. BENTO GRID OF CORE PLATFORM FEATURES */}
-      <section className="relative py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-        <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-mono font-bold text-[#E837AC] uppercase tracking-widest">Platform Core Architecture</span>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight">Administrative precision. Global scales.</h2>
-          <p className="text-[#F0EBEB]/70 max-w-2xl mx-auto text-sm md:text-base">
-            Engineered specifically to solve the calendar and alignment complexities inherent to global education networks.
+        <div className="relative mx-auto" style={{ width: 760, maxWidth: "100%", height: 600 }}>
+          <svg viewBox="0 0 760 600" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
+            {/* counter-rotating orbit rings */}
+            <g>
+              <animateTransform attributeName="transform" type="rotate" from={`0 ${CX} ${CY}`} to={`360 ${CX} ${CY}`} dur="44s" repeatCount="indefinite" />
+              <circle cx={CX} cy={CY} r={R} fill="none" stroke="rgba(42,4,33,0.16)" strokeWidth="1.5" strokeDasharray="2 12" />
+            </g>
+            <g>
+              <animateTransform attributeName="transform" type="rotate" from={`360 ${CX} ${CY}`} to={`0 ${CX} ${CY}`} dur="64s" repeatCount="indefinite" />
+              <circle cx={CX} cy={CY} r={R - 52} fill="none" stroke="rgba(42,4,33,0.1)" strokeWidth="1" strokeDasharray="1 9" />
+            </g>
+            {/* spokes + travelling signal pulses */}
+            {pts.map((p, i) => (
+              <g key={p.name}>
+                <line x1={p.x} y1={p.y} x2={CX} y2={CY} stroke="rgba(42,4,33,0.2)" strokeWidth="2" strokeLinecap="round" />
+                <circle r="5" fill={p.color}>
+                  <animateMotion dur="2.4s" begin={`${i * 0.34}s`} repeatCount="indefinite" path={`M ${p.x},${p.y} L ${CX},${CY}`} />
+                  <animate attributeName="opacity" values="0;1;1;0" dur="2.4s" begin={`${i * 0.34}s`} repeatCount="indefinite" />
+                </circle>
+              </g>
+            ))}
+          </svg>
+
+          {/* pulsing glow behind F (centering on outer, pulse on inner) */}
+          <div className="absolute pointer-events-none" style={{ left: CX, top: CY, transform: "translate(-50%,-50%)", zIndex: 1 }}>
+            <motion.div className="rounded-full" style={{ width: 230, height: 230, background: "radial-gradient(circle, rgba(232,55,172,0.55), transparent 65%)", filter: "blur(18px)" }}
+              animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0.9, 0.5] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
+          </div>
+
+          {/* F hub (centering on outer, float on inner) */}
+          <div className="absolute" style={{ left: CX, top: CY, transform: "translate(-50%,-50%)", zIndex: 3 }}>
+            <motion.div className="flex items-center justify-center rounded-3xl"
+              style={{ width: 140, height: 140, background: "linear-gradient(150deg, #ffffff, #ffe9f4)", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 26px 64px -14px rgba(183,30,138,0.55)" }}
+              animate={{ y: [0, -6, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+              <span className="font-black" style={{ fontSize: 92, lineHeight: 1, paddingBottom: "0.06em",
+                background: "linear-gradient(150deg, #F78B43, #E837AC 60%, #C71E8A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>f</span>
+            </motion.div>
+          </div>
+
+          {/* source nodes (centering on outer, entrance + bob on inner) */}
+          {pts.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <div key={p.name} className="absolute" style={{ left: p.x, top: p.y, transform: "translate(-50%,-50%)", zIndex: 4 }}>
+                <motion.div className="flex flex-col items-center gap-1.5"
+                  initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+                  transition={{ delay: 0.15 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+                  <motion.div className="w-16 h-16 rounded-2xl bg-white grid place-items-center"
+                    style={{ border: "1px solid rgba(255,255,255,0.9)", boxShadow: `0 12px 32px -8px ${p.color}66, 0 4px 12px rgba(42,4,33,0.12)` }}
+                    animate={{ y: [0, -7, 0] }} transition={{ duration: 3 + i * 0.25, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}>
+                    <Icon className="w-7 h-7" style={{ color: p.color }} />
+                  </motion.div>
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.7)", color: "#2a0421" }}>{p.name}</span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════
+   EXPLAINER — what the dashboard does (warm → dark bridge)
+══════════════════════════════════════════════════ */
+const PIPELINE = [
+  { icon: Inbox,           label: "Collect",    desc: "Pulls every alert, email, ticket and message from all your platforms in real time." },
+  { icon: Filter,          label: "Filter",     desc: "Strips out the noise — duplicates, FYIs and resolved items never reach you." },
+  { icon: Brain,           label: "Prioritise", desc: "AI reads each item and ranks it Urgent · Action · FYI by real impact." },
+  { icon: BarChart3,       label: "Visualise",  desc: "Surfaces what matters as a daily brief, smart inbox and priority matrix." },
+];
+
+function ExplainerSection() {
+  return (
+    <section className="relative py-24">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Reveal className="text-center mb-14">
+          <span className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: "#7a0f5e" }}>What Faria does</span>
+          <h2 className="text-3xl md:text-5xl font-black mt-3" style={{ color: "#2a0421", letterSpacing: "-0.02em" }}>
+            From scattered noise<br />to one clear view.
+          </h2>
+          <p className="max-w-2xl mx-auto mt-4 text-base font-medium leading-relaxed" style={{ color: "rgba(42,4,33,0.72)" }}>
+            Your team drowns in notifications across six tools. Faria does the triage for you — automatically, every minute.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Card 1: Multi-timezone Matrix */}
-          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#E837AC]/30 transition-colors">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#E837AC]/10 border border-[#E837AC]/20 flex items-center justify-center text-[#E837AC]">
-                <Globe className="w-6 h-6 text-[#E837AC]" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight text-white">Multi-Timezone Sweep Matrix</h3>
-              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
-                Automatically maps local calendars to real UTC overlaps. Instantly discover exact hour segments where teammates across three continents share synchronized free blocks.
-              </p>
-            </div>
-            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#E837AC] gap-1 group-hover:gap-2 transition-all">
-              <span>Explore Overlap Tracker</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Card 2: GDPR & Privacy Compliance */}
-          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#F78843]/30 transition-colors">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#F78843]/10 border border-[#F78843]/20 flex items-center justify-center text-[#F78843]">
-                <ShieldCheck className="w-6 h-6 text-[#F78843]" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight text-white">GDPR & Academic Governance</h3>
-              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
-                Filter private events, mute confidential keywords, and configure secure working-hour fences. Rest assured that sensitive school records and private calendar items remain fully localized.
-              </p>
-            </div>
-            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#F78843] gap-1 group-hover:gap-2 transition-all">
-              <span>Inspect Security Mandates</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Card 3: Intelligent AI Copilot */}
-          <div className="bg-[#391638]/45 border border-white/10 rounded-3xl p-8 backdrop-blur-md relative overflow-hidden flex flex-col justify-between group hover:border-[#F7D35F]/30 transition-colors">
-            <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-[#F7D35F]/10 border border-[#F7D35F]/20 flex items-center justify-center text-[#F7D35F]">
-                <Sparkles className="w-6 h-6 text-[#F7D35F] animate-pulse" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight text-white">Gemini Governance Copilot</h3>
-              <p className="text-sm text-[#F0EBEB]/60 leading-relaxed">
-                Talk to your schedule in natural human language. Let our integrated AI analyze meeting rosters, evaluate school-day streaks, and auto-recommend optimal workspace agendas instantly.
-              </p>
-            </div>
-            <div className="mt-8 pt-4 border-t border-white/5 flex items-center text-xs font-bold text-[#F7D35F] gap-1 group-hover:gap-2 transition-all">
-              <span>Launch AI Sandbox</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. INTERACTIVE SANDBOX DEMO SECTION */}
-      <section className="relative py-20 bg-black/15 z-10 border-t border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            
-            {/* Left side: descriptions of sandbox */}
-            <div className="lg:col-span-5 space-y-6 text-left">
-              <span className="text-xs font-mono font-bold text-[#F7D35F] uppercase tracking-widest">Interactive Experience</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">Experience Faria Operations in real-time</h2>
-              <p className="text-sm text-[#F0EBEB]/70 leading-relaxed">
-                Click through the preview tabs to visualize the high-momentum tracking streams we use to map global academic rosters.
-              </p>
-
-              {/* Tabs list */}
-              <div className="space-y-2 pt-4">
-                {[
-                  { id: "scheduling", title: "Overlap Schedulers", desc: "Discover consensus-free times." },
-                  { id: "matrix", title: "Compliance Checklists", desc: "Mute keywords & protect GDPR data." },
-                  { id: "analytics", title: "Global Roster Analytics", desc: "Evaluate team distribution across regions." }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveSandboxTab(tab.id as any)}
-                    className={`w-full text-left p-3.5 rounded-2xl border transition-all cursor-pointer ${
-                      activeSandboxTab === tab.id
-                        ? "bg-white/5 border-[#E837AC] text-white shadow-lg"
-                        : "bg-transparent border-transparent text-white/50 hover:text-white"
-                    }`}
-                  >
-                    <h4 className="text-sm font-bold">{tab.title}</h4>
-                    <p className="text-xs opacity-80 mt-0.5">{tab.desc}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Right side: Mockup terminal container */}
-            <div className="lg:col-span-7">
-              <div className="bg-[#391638] border border-white/10 rounded-3xl shadow-2xl overflow-hidden relative">
-                
-                {/* Header terminal controls */}
-                <div className="h-12 bg-black/20 flex items-center justify-between px-5 border-b border-white/5">
-                  <div className="flex gap-1.5">
-                    <span className="w-3 h-3 rounded-full bg-rose-400/80" />
-                    <span className="w-3 h-3 rounded-full bg-[#F7D35F]/80" />
-                    <span className="w-3 h-3 rounded-full bg-emerald-400/80" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          {PIPELINE.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <Reveal key={step.label} delay={i * 0.12}>
+                <div className="relative rounded-2xl p-6 h-full" style={{ background: "rgba(255,255,255,0.82)", border: "1px solid rgba(255,255,255,0.9)", boxShadow: "0 18px 44px -22px rgba(120,15,90,0.5)", backdropFilter: "blur(6px)" }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-11 h-11 rounded-xl grid place-items-center" style={{ background: "linear-gradient(135deg, #F78B43, #E837AC)" }}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-2xl font-black" style={{ color: "rgba(42,4,33,0.14)" }}>0{i + 1}</span>
                   </div>
-                  <span className="text-[10px] text-white/40 font-mono font-bold uppercase tracking-wider">
-                    governance-matrix-v1.4.1.sys
-                  </span>
-                  <span className="w-4 h-4 rounded bg-white/5 flex items-center justify-center text-[10px] font-mono text-white/30">
-                    &bull;
-                  </span>
-                </div>
-
-                {/* Sandbox viewports based on tab */}
-                <div className="p-8 min-h-[300px] flex flex-col justify-center">
-                  {activeSandboxTab === "scheduling" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4 text-left"
-                    >
-                      <div className="flex items-center justify-between bg-black/30 border border-white/5 rounded-xl p-4">
-                        <div>
-                          <p className="text-xs font-bold text-[#E837AC]">Academic Alignment Consensus</p>
-                          <p className="text-[10px] text-white/40">London, Mumbai, and Tokyo streams verified</p>
-                        </div>
-                        <span className="text-[11px] font-bold text-[#F7D35F] bg-[#F7D35F]/10 px-2.5 py-1 rounded">Optimal Run</span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white/5 p-3 rounded-xl text-center">
-                          <p className="text-[10px] text-white/40">Consensus Free-Block</p>
-                          <p className="text-sm font-bold mt-1">11:30 - 13:00</p>
-                          <span className="text-[9px] text-[#E837AC] font-mono">UTC TIMEZONE</span>
-                        </div>
-                        <div className="bg-white/5 p-3 rounded-xl text-center">
-                          <p className="text-[10px] text-white/40">Average Availability</p>
-                          <p className="text-sm font-bold mt-1">4.5 Hrs / Day</p>
-                          <span className="text-[9px] text-[#F78843] font-mono">HIGH-MOMENTUM</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeSandboxTab === "matrix" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4 text-left"
-                    >
-                      <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                        <p className="text-xs font-bold text-[#F78843] mb-2 flex items-center gap-1.5">
-                          <ShieldCheck className="w-4 h-4 text-[#F78843]" />
-                          GDPR Privacy Filter
-                        </p>
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between text-[11px] text-white/60">
-                            <span>Muted Keyword: "Staff Evaluation"</span>
-                            <span className="text-emerald-400 font-bold">MUTED</span>
-                          </div>
-                          <div className="flex justify-between text-[11px] text-white/60">
-                            <span>Muted Keyword: "Board Meeting"</span>
-                            <span className="text-emerald-400 font-bold">MUTED</span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-white/40 italic">
-                        * All non-compliant text strings are client-side filtered prior to calendar render cycles.
-                      </p>
-                    </motion.div>
-                  )}
-
-                  {activeSandboxTab === "analytics" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="space-y-4 text-left"
-                    >
-                      <div className="flex justify-between items-center bg-black/20 p-4 rounded-xl">
-                        <div>
-                          <p className="text-xs font-bold">Roster Coverage Distribution</p>
-                          <p className="text-[10px] text-white/40">Academic staff across global operations</p>
-                        </div>
-                        <span className="text-xs font-bold text-[#F7D35F]">99.8% SYNC</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-[#E837AC] to-[#F78843] w-4/5" />
-                        </div>
-                        <div className="flex justify-between text-[9px] text-white/50">
-                          <span>EMEA (80%)</span>
-                          <span>APAC (65%)</span>
-                          <span>Americas (40%)</span>
-                        </div>
-                      </div>
-                    </motion.div>
+                  <h3 className="text-lg font-black mb-1.5" style={{ color: "#2a0421" }}>{step.label}</h3>
+                  <p className="text-xs leading-relaxed" style={{ color: "rgba(42,4,33,0.62)" }}>{step.desc}</p>
+                  {i < PIPELINE.length - 1 && (
+                    <ArrowRight className="hidden md:block absolute top-1/2 -right-3.5 w-5 h-5" style={{ transform: "translateY(-50%)", color: "rgba(42,4,33,0.3)" }} />
                   )}
                 </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-                {/* Bottom console output strip */}
-                <div className="h-10 bg-black/40 flex items-center px-5 border-t border-white/5 text-[9px] font-mono text-[#F7D35F]">
-                  <span className="animate-pulse mr-2">&gt;_</span> Sync sequence successfully initialized. Overlap data ready.
-                </div>
+/* ══════════════════════════════════════════════════
+   FEATURE TORNADO — cards spiral up a vertical helix
+══════════════════════════════════════════════════ */
+const FEATURES = [
+  { tag: "Feature 01", title: "AI Smart Inbox", color: "#E837AC", side: 1,
+    desc: "Every alert from every tool, auto-sorted Urgent · Action · FYI.",
+    points: ["Pulls Gmail, Slack, Zendesk & more", "AI reads and tags each item", "Urgent always surfaces to the top"],
+    Demo: InboxDemo },
+  { tag: "Feature 02", title: "Smart Tasks", color: "#F78B43", side: -1,
+    desc: "Turn what matters into a focused, prioritised task stack.",
+    points: ["High / Medium / Low priorities", "Live daily progress bar", "Feeds straight into the matrix"],
+    Demo: TaskDemo },
+  { tag: "Feature 03", title: "Priority Matrix", color: "#D8A200", side: 1,
+    desc: "Drag everything into an Eisenhower matrix to plan your day.",
+    points: ["Do First · Plan · Delegate · Archive", "Drag items between quadrants", "Capacity warnings per quadrant"],
+    Demo: MatrixDemo },
+];
 
-              </div>
+type Feature = typeof FEATURES[number];
+
+function TornadoDemo({ index, total, progress, feature }: {
+  index: number; total: number; progress: MotionValue<number>; feature: Feature;
+}) {
+  const s = index / total, e = (index + 1) / total;
+  const input = [s, s + 0.13, e - 0.13, e];
+  const side = feature.side;
+  const opacity = useTransform(progress, input, [0, 1, 1, 0]);
+  const rotateY = useTransform(progress, input, [side * 135, 0, 0, -side * 135]);
+  const x       = useTransform(progress, input, [side * 440, 0, 0, -side * 440]);
+  const y       = useTransform(progress, input, [260, 0, 0, -260]);
+  const z       = useTransform(progress, input, [-560, 0, 0, -560]);
+  const scale   = useTransform(progress, input, [0.5, 1, 1, 0.5]);
+  const local   = useTransform(progress, [s, s + 0.18], [0, 1]);
+  const Demo = feature.Demo;
+  return (
+    <motion.div className="absolute inset-0 flex items-center justify-center" style={{ opacity }}>
+      <motion.div style={{ x, y, z, rotateY, scale, transformStyle: "preserve-3d" }} className="w-full max-w-[460px]">
+        <div style={{ boxShadow: `0 44px 90px -28px ${feature.color}77` }}>
+          <Demo progress={local} />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function TornadoText({ index, total, progress, feature }: {
+  index: number; total: number; progress: MotionValue<number>; feature: Feature;
+}) {
+  const s = index / total, e = (index + 1) / total;
+  const input = [s, s + 0.12, e - 0.12, e];
+  const opacity = useTransform(progress, input, [0, 1, 1, 0]);
+  const y = useTransform(progress, input, [42, 0, 0, -42]);
+  return (
+    <motion.div className="absolute inset-0 flex flex-col justify-center" style={{ opacity, y }}>
+      <span className="text-xs font-black uppercase tracking-[0.24em]" style={{ color: "#B81E83" }}>{feature.tag}</span>
+      <h3 className="text-4xl md:text-5xl font-black mt-2" style={{ color: "#2a0421", letterSpacing: "-0.02em" }}>{feature.title}</h3>
+      <p className="text-base mt-3 max-w-sm font-medium leading-relaxed" style={{ color: "rgba(42,4,33,0.72)" }}>{feature.desc}</p>
+      <ul className="mt-5 space-y-2.5">
+        {feature.points.map((pt) => (
+          <li key={pt} className="flex items-center gap-2.5 text-sm font-bold" style={{ color: "#2a0421" }}>
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: feature.color }} /> {pt}
+          </li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+}
+
+function FeatureTornado() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+
+  return (
+    <section ref={ref} style={{ height: `${FEATURES.length * 130 + 30}vh` }} className="relative">
+      <div className="sticky top-0 h-screen overflow-hidden flex items-center">
+        <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-10 items-center">
+          {/* LEFT — 3D tornado of feature demos */}
+          <div className="relative h-[440px] lg:h-[520px] order-2 lg:order-1" style={{ perspective: 1400 }}>
+            {FEATURES.map((f, i) => (
+              <TornadoDemo key={f.title} index={i} total={FEATURES.length} progress={scrollYProgress} feature={f} />
+            ))}
+          </div>
+          {/* RIGHT — brief synced explanation */}
+          <div className="relative h-[300px] order-1 lg:order-2">
+            <div className="absolute -top-12 left-0 text-xs font-black uppercase tracking-[0.3em]" style={{ color: "rgba(42,4,33,0.42)" }}>
+              Inside the dashboard
             </div>
-
+            {FEATURES.map((f, i) => (
+              <TornadoText key={f.title} index={i} total={FEATURES.length} progress={scrollYProgress} feature={f} />
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* 5. BOTTOM CALL TO ACTION */}
-      <section className="py-28 relative z-10 overflow-hidden">
-        {/* Dynamic backdrop accent */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-[#E837AC]/15 via-[#F78843]/10 to-transparent rounded-full blur-[110px] pointer-events-none" />
+/* ══════════════════════════════════════════════════
+   MAIN PAGE
+══════════════════════════════════════════════════ */
+export default function LandingPage() {
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+  const handleDemo = () => { login(); navigate("/dashboard"); };
 
-        <div className="max-w-4xl mx-auto px-4 text-center space-y-10 relative z-10">
-          <div className="space-y-5">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight leading-tight">
-              Ready to streamline your <br />
-              educational operations?
-            </h2>
-            <p className="text-base md:text-lg text-[#F0EBEB]/70 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of academic administrators and curriculum leads worldwide who trust Faria to power their timezone alignments and compliance workflows.
-            </p>
+  return (
+    <div className="relative font-sans" style={{ WebkitFontSmoothing: "antialiased" }}>
+      {/* Fixed, mouse-reactive warm gradient — one consistent backdrop for the whole page */}
+      <InteractiveGradient />
+
+      <div className="relative" style={{ zIndex: 1 }}>
+        <HeroSection isAuthenticated={isAuthenticated} onDemo={handleDemo} />
+        <IntegrationsSection />
+        <ExplainerSection />
+        <FeatureTornado />
+
+        {/* CTA */}
+        <section className="relative py-32 overflow-hidden">
+          <div className="relative max-w-4xl mx-auto px-4 text-center space-y-10" style={{ zIndex: 5 }}>
+            <Reveal className="space-y-5">
+              <p className="text-xs font-black uppercase tracking-[0.22em]" style={{ color: "#7a0f5e" }}>Ready when you are</p>
+              <h2 className="text-5xl md:text-7xl font-black leading-tight" style={{ color: "#2a0421", letterSpacing: "-0.02em" }}>
+                Stop chasing<br />notifications.
+              </h2>
+              <p className="text-base md:text-lg max-w-2xl mx-auto font-medium leading-relaxed" style={{ color: "rgba(42,4,33,0.72)" }}>
+                One dashboard collects, filters and prioritises everything your ops team gets — so you start each day already in control.
+              </p>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                {isAuthenticated ? (
+                  <Link to="/dashboard" className="group px-10 py-5 text-white font-bold rounded-full hover:scale-[1.04] active:scale-[0.97] transition-all flex items-center justify-center gap-2 text-base"
+                    style={{ background: "#2a0421", boxShadow: "0 14px 40px rgba(42,4,33,0.32)" }}>
+                    Open Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                ) : (
+                  <>
+                    <button onClick={handleDemo} className="group px-10 py-5 text-white font-bold rounded-full hover:scale-[1.04] active:scale-[0.97] transition-all flex items-center justify-center gap-2 text-base"
+                      style={{ background: "#2a0421", boxShadow: "0 14px 40px rgba(42,4,33,0.32)" }}>
+                      Try the Demo <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                    <Link to="/login" className="px-10 py-5 font-bold rounded-full hover:scale-[1.04] active:scale-[0.97] transition-all text-center text-base"
+                      style={{ background: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.9)", color: "#2a0421" }}>
+                      Log In
+                    </Link>
+                  </>
+                )}
+              </div>
+            </Reveal>
+            <Reveal delay={0.28}>
+              <p className="text-xs" style={{ color: "rgba(42,4,33,0.45)" }}>Faria Education Group · Internal Operations Dashboard · {new Date().getFullYear()}</p>
+            </Reveal>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {isAuthenticated ? (
-              <Link
-                to="/dashboard"
-                id="cta-dashboard-btn"
-                className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-              >
-                Enter Faria Workspace
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  id="cta-login-btn"
-                  className="px-8 py-4 bg-[#E837AC] hover:bg-[#c92f93] text-white font-extrabold text-sm rounded-full shadow-lg shadow-[#E837AC]/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  Authenticate Portal
-                </Link>
-
-                <button
-                  onClick={handleDemoSignIn}
-                  id="cta-demo-btn"
-                  className="px-8 py-4 bg-white/10 hover:bg-white/15 border border-white/15 text-white font-extrabold text-sm rounded-full backdrop-blur-md hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                >
-                  Explore Interactive Demo
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </section>
-
+        </section>
+      </div>
     </div>
   );
 }
