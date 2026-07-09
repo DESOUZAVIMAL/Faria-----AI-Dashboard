@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  motion, useScroll, useTransform, useInView, AnimatePresence, animate, MotionValue,
+  motion, useScroll, useTransform, useInView, AnimatePresence, animate, MotionValue, useMotionValue,
 } from "motion/react";
 import { useAuth } from "../lib/AuthContext";
 import InteractiveGradient from "../components/InteractiveGradient";
@@ -568,16 +568,18 @@ type Feature = typeof FEATURES[number];
 function TornadoDemo({ index, total, progress, feature }: {
   index: number; total: number; progress: MotionValue<number>; feature: Feature;
 }) {
-  const s = index / total, e = (index + 1) / total;
-  const input = [s, s + 0.13, e - 0.13, e];
+  // Center-based, OVERLAPPING windows so features crossfade with no blank gap.
+  const c = (index + 0.5) / total;
+  const w = 0.30; // half-width — wide enough to overlap the neighbouring feature
+  const input = [c - w, c - w * 0.42, c + w * 0.42, c + w];
   const side = feature.side;
   const opacity = useTransform(progress, input, [0, 1, 1, 0]);
-  const rotateY = useTransform(progress, input, [side * 135, 0, 0, -side * 135]);
-  const x       = useTransform(progress, input, [side * 440, 0, 0, -side * 440]);
-  const y       = useTransform(progress, input, [260, 0, 0, -260]);
-  const z       = useTransform(progress, input, [-560, 0, 0, -560]);
-  const scale   = useTransform(progress, input, [0.5, 1, 1, 0.5]);
-  const local   = useTransform(progress, [s, s + 0.18], [0, 1]);
+  const rotateY = useTransform(progress, input, [side * 70, 0, 0, -side * 70]);
+  const x       = useTransform(progress, input, [side * 300, 0, 0, -side * 300]);
+  const y       = useTransform(progress, input, [160, 0, 0, -160]);
+  const z       = useTransform(progress, input, [-360, 0, 0, -360]);
+  const scale   = useTransform(progress, input, [0.7, 1, 1, 0.7]);
+  const local   = useTransform(progress, [c - w, c], [0, 1]);
   const Demo = feature.Demo;
   return (
     <motion.div className="absolute inset-0 flex items-center justify-center" style={{ opacity }}>
@@ -593,8 +595,10 @@ function TornadoDemo({ index, total, progress, feature }: {
 function TornadoText({ index, total, progress, feature }: {
   index: number; total: number; progress: MotionValue<number>; feature: Feature;
 }) {
-  const s = index / total, e = (index + 1) / total;
-  const input = [s, s + 0.12, e - 0.12, e];
+  // Match the demo's overlapping window exactly so text + demo crossfade together.
+  const c = (index + 0.5) / total;
+  const w = 0.30;
+  const input = [c - w, c - w * 0.42, c + w * 0.42, c + w];
   const opacity = useTransform(progress, input, [0, 1, 1, 0]);
   const y = useTransform(progress, input, [42, 0, 0, -42]);
   return (
@@ -613,9 +617,33 @@ function TornadoText({ index, total, progress, feature }: {
   );
 }
 
+/*
+  Robust scroll progress: read the section's real position every frame via
+  getBoundingClientRect. This is immune to Lenis smooth-scroll timing (which was
+  compressing Framer's useScroll so features 2 & 3 never reached full opacity).
+*/
+function useSectionProgress(ref: React.RefObject<HTMLDivElement | null>): MotionValue<number> {
+  const progress = useMotionValue(0);
+  useEffect(() => {
+    let raf = 0;
+    const tick = () => {
+      const el = ref.current;
+      if (el) {
+        const total = el.offsetHeight - window.innerHeight;
+        const scrolled = Math.min(Math.max(-el.getBoundingClientRect().top, 0), Math.max(1, total));
+        progress.set(total > 0 ? scrolled / total : 0);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [ref, progress]);
+  return progress;
+}
+
 function FeatureTornado() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const scrollYProgress = useSectionProgress(ref);
 
   return (
     <section ref={ref} style={{ height: `${FEATURES.length * 130 + 30}vh` }} className="relative">

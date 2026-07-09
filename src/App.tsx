@@ -28,9 +28,12 @@ function AppShell() {
 
   return (
     <div
-      className="min-h-screen bg-[#391638] text-white selection:bg-[#E837AC]/20 selection:text-[#E837AC] font-sans antialiased relative overflow-hidden flex flex-col"
+      className="min-h-screen bg-[#391638] text-white selection:bg-[#E837AC]/20 selection:text-[#E837AC] font-sans antialiased relative flex flex-col"
       style={isDashboard ? { background: DASHBOARD_BG, backgroundAttachment: "fixed" } : undefined}
     >
+      {/* Decorative background — clipped in its OWN wrapper so it never breaks
+          position:sticky for descendants (overflow-hidden on the shell root did). */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
       {/* Sleek Faria "Tracks" design concept in the background representing forward momentum */}
       <div className="absolute top-0 right-0 w-full max-w-2xl h-[600px] pointer-events-none opacity-10 md:opacity-15" aria-hidden="true">
         <svg className="w-full h-full" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,6 +48,7 @@ function AppShell() {
             </linearGradient>
           </defs>
         </svg>
+      </div>
       </div>
 
       {/* Top Navigation Bar */}
